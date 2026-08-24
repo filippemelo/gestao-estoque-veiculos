@@ -51,6 +51,19 @@ public class ProprietarioService(
         return new ResultadoResponse<ProprietarioResponse>((ProprietarioResponse)criado);
     }
 
+    public async Task<ResultadoResponse<IEnumerable<ProprietarioResponse>>> ListarPorVeiculoAsync(int veiculoId)
+    {
+        var veiculo = await _veiculoRepository.ObterVeiculoAsync(veiculoId);
+        if (veiculo is null)
+            throw new NotFoundException($"Veículo {veiculoId} não encontrado.");
+
+        var proprietarios = await _proprietarioRepository.ListarPorVeiculoAsync(veiculoId);
+
+        var respostas = proprietarios.Select(p => (ProprietarioResponse)p).ToList();
+
+        return new ResultadoResponse<IEnumerable<ProprietarioResponse>>(respostas);
+    }
+
     private static void Validar(object request)
     {
         var contexto = new ValidationContext(request);

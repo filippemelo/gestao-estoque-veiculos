@@ -14,5 +14,11 @@ public static class ProprietarioEndpoint
             var resposta = await service.CriarProprietarioAsync(request);
             return Results.Created($"/proprietarios/{resposta.Dados.Id}", resposta);
         });
+
+        group.MapGet("veiculo/{veiculoId:int}", async (int veiculoId, IProprietarioService service) =>
+        {
+            var resposta = await service.ListarPorVeiculoAsync(veiculoId);
+            return Results.Ok(resposta);
+        });
     }
 }
