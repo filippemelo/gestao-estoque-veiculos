@@ -117,6 +117,19 @@ public class ProprietarioService(
         return new ResultadoResponse<ProprietarioResponse>((ProprietarioResponse)atualizado);
     }
 
+    public async Task ExcluirProprietarioAsync(int id)
+    {
+        var proprietario = await _proprietarioRepository.ObterProprietarioAsync(id);
+        if (proprietario is null)
+            throw new NotFoundException($"Proprietário {id} não encontrado.");
+
+        if (proprietario.IsProprietarioAtual)
+            throw new ConflictException(
+                $"Não é possível excluir o proprietário {id}: ainda é o proprietário atual do veículo.");
+
+        await _proprietarioRepository.RemoverProprietarioAsync(id);
+    }
+
     private static void Validar(object request)
     {
         var contexto = new ValidationContext(request);

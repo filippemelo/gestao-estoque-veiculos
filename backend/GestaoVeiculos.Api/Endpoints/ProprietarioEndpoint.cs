@@ -26,5 +26,11 @@ public static class ProprietarioEndpoint
             var resposta = await service.AtualizarProprietarioAsync(id, request);
             return Results.Ok(resposta);
         });
+
+        group.MapDelete("{id:int}", async (int id, IProprietarioService service) =>
+        {
+            await service.ExcluirProprietarioAsync(id);
+            return Results.NoContent();
+        });
     }
 }

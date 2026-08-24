@@ -258,8 +258,26 @@ public class ProprietarioRepository(IConexaoFactory conexaoFactory) : IProprieta
         }
     }
 
-    public Task RemoverProprietarioAsync(int id)
+    public async Task RemoverProprietarioAsync(int id)
     {
-        throw new NotImplementedException();
+        const string sql = "DELETE FROM PROPRIETARIO WHERE ID = :id";
+
+        try
+        {
+            await using var conexao = _conexaoFactory.CriarConexao();
+            await conexao.OpenAsync();
+
+            await using var cmd = conexao.CreateCommand();
+            cmd.BindByName = true;
+            cmd.CommandText = sql;
+
+            cmd.Parameters.Add(new OracleParameter("id", OracleDbType.Int32) { Value = id });
+
+            await cmd.ExecuteNonQueryAsync();
+        }
+        catch (OracleException ex)
+        {
+            throw OracleExceptionTranslator.Traduzir(ex);
+        }
     }
 }
