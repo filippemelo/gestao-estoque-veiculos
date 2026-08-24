@@ -82,6 +82,56 @@ public class VeiculoService(
         await _veiculoRepository.RemoverVeiculoAsync(id);
     }
 
+    public async Task<ResultadoResponse<VeiculoResponse>> AtualizarVeiculoAsync(int id, AtualizarVeiculoRequest request)
+    {
+        Validar(request);
+        if (request.NovoProprietario is not null)
+            Validar(request.NovoProprietario);
+
+        var atual = await _veiculoRepository.ObterVeiculoAsync(id);
+        if (atual is null)
+            throw new NotFoundException($"Veículo {id} não encontrado.");
+
+        if (request.Situacao == "Vendido" && request.NovoProprietario is null)
+            throw new ValidationException(
+                "Ao marcar o veículo como Vendido é obrigatório informar o novo proprietário.");
+
+        var atualizado = Veiculo.Reconstituir(
+            atual.Id,
+            request.Marca,
+            request.Modelo,
+            request.Ano,
+            request.Cor,
+            request.Preco,
+            request.Tipo,
+            request.Situacao,
+            atual.Placa,
+            request.Quilometragem);
+
+        if (request.Situacao == "Vendido")
+        {
+            var hoje = DateTime.Today;
+
+            var proprietarios = await _proprietarioRepository.ListarPorVeiculoAsync(id);
+            var atualAnterior = proprietarios.FirstOrDefault(p => p.IsProprietarioAtual);
+
+            var novo = new Proprietario(
+                id,
+                request.NovoProprietario!.NomeCompleto,
+                request.NovoProprietario.Cpf,
+                hoje,
+                request.NovoProprietario.Observacao);
+
+            await _veiculoRepository.AtualizarComVendaAsync(atualizado, atualAnterior?.Id, hoje, novo);
+        }
+        else
+        {
+            await _veiculoRepository.AtualizarVeiculoAsync(atualizado);
+        }
+
+        return new ResultadoResponse<VeiculoResponse>((VeiculoResponse)atualizado);
+    }
+
     private static void Validar(object request)
     {
         var contexto = new ValidationContext(request);

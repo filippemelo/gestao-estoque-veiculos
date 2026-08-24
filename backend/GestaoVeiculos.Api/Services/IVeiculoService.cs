@@ -10,4 +10,5 @@ public interface IVeiculoService
     Task<ResultadoResponse<VeiculoDetalheResponse>> ObterVeiculoAsync(int id);
     Task<ResultadoPaginadoResponse<VeiculoResponse>> ListarVeiculosAsync(ListarVeiculosPageOption pageOption);
     Task ExcluirVeiculoAsync(int id);
+    Task<ResultadoResponse<VeiculoResponse>> AtualizarVeiculoAsync(int id, AtualizarVeiculoRequest request);
 }

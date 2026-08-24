@@ -33,5 +33,11 @@ public static class VeiculoEndpoint
             await service.ExcluirVeiculoAsync(id);
             return Results.NoContent();
         });
+
+        group.MapPut("{id:int}", async (int id, AtualizarVeiculoRequest request, IVeiculoService service) =>
+        {
+            var resposta = await service.AtualizarVeiculoAsync(id, request);
+            return Results.Ok(resposta);
+        });
     }
 }

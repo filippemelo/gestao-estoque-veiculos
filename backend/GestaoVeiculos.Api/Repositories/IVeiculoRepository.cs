@@ -10,5 +10,6 @@ public interface IVeiculoRepository
     Task<Veiculo?> ObterVeiculoPorPlacaAsync(string placa);
     Task<int> InserirVeiculoAsync(Veiculo veiculo);
     Task AtualizarVeiculoAsync(Veiculo veiculo);
+    Task AtualizarComVendaAsync(Veiculo veiculo, int? idProprietarioAtualAnterior, DateTime dataVenda, Proprietario novoProprietario);
     Task RemoverVeiculoAsync(int id);
 }

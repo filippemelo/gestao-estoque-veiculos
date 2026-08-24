@@ -191,9 +191,113 @@ public class VeiculoRepository(IConexaoFactory conexaoFactory) : IVeiculoReposit
         }
     }
 
-    public Task AtualizarVeiculoAsync(Veiculo veiculo)
+    public async Task AtualizarVeiculoAsync(Veiculo veiculo)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await using var conexao = _conexaoFactory.CriarConexao();
+            await conexao.OpenAsync();
+
+            await using var cmd = conexao.CreateCommand();
+            AplicarUpdateVeiculo(cmd, veiculo);
+
+            await cmd.ExecuteNonQueryAsync();
+        }
+        catch (OracleException ex)
+        {
+            throw OracleExceptionTranslator.Traduzir(ex);
+        }
+    }
+
+    public async Task AtualizarComVendaAsync(
+        Veiculo veiculo,
+        int? idProprietarioAtualAnterior,
+        DateTime dataVenda,
+        Proprietario novoProprietario)
+    {
+        try
+        {
+            await using var conexao = _conexaoFactory.CriarConexao();
+            await conexao.OpenAsync();
+
+            await using var transacao = (OracleTransaction)await conexao.BeginTransactionAsync();
+
+            await using (var cmdVeiculo = conexao.CreateCommand())
+            {
+                cmdVeiculo.Transaction = transacao;
+                AplicarUpdateVeiculo(cmdVeiculo, veiculo);
+                await cmdVeiculo.ExecuteNonQueryAsync();
+            }
+
+            if (idProprietarioAtualAnterior is not null)
+            {
+                await using var cmdEncerrar = conexao.CreateCommand();
+                cmdEncerrar.Transaction = transacao;
+                cmdEncerrar.BindByName = true;
+                cmdEncerrar.CommandText = """
+                                          UPDATE PROPRIETARIO
+                                          SET DATA_VENDA = :dataVenda
+                                          WHERE ID = :id AND DATA_VENDA IS NULL
+                                          """;
+                cmdEncerrar.Parameters.Add(new OracleParameter("dataVenda", OracleDbType.Date) { Value = dataVenda });
+                cmdEncerrar.Parameters.Add(new OracleParameter("id", OracleDbType.Int32) { Value = idProprietarioAtualAnterior.Value });
+                await cmdEncerrar.ExecuteNonQueryAsync();
+            }
+
+            await using (var cmdInserir = conexao.CreateCommand())
+            {
+                cmdInserir.Transaction = transacao;
+                cmdInserir.BindByName = true;
+                cmdInserir.CommandText = """
+                                         INSERT INTO PROPRIETARIO
+                                             (VEICULO_ID, NOME_COMPLETO, CPF, DATA_AQUISICAO, OBSERVACAO)
+                                         VALUES
+                                             (:veiculoId, :nomeCompleto, :cpf, :dataAquisicao, :observacao)
+                                         """;
+                cmdInserir.Parameters.Add(new OracleParameter("veiculoId", OracleDbType.Int32) { Value = novoProprietario.VeiculoId });
+                cmdInserir.Parameters.Add(new OracleParameter("nomeCompleto", OracleDbType.Varchar2) { Value = novoProprietario.NomeCompleto });
+                cmdInserir.Parameters.Add(new OracleParameter("cpf", OracleDbType.Varchar2) { Value = novoProprietario.Cpf });
+                cmdInserir.Parameters.Add(new OracleParameter("dataAquisicao", OracleDbType.Date) { Value = novoProprietario.DataAquisicao });
+                cmdInserir.Parameters.Add(new OracleParameter("observacao", OracleDbType.Varchar2)
+                {
+                    Value = (object?)novoProprietario.Observacao ?? DBNull.Value
+                });
+                await cmdInserir.ExecuteNonQueryAsync();
+            }
+
+            await transacao.CommitAsync();
+        }
+        catch (OracleException ex)
+        {
+            throw OracleExceptionTranslator.Traduzir(ex);
+        }
+    }
+
+    private static void AplicarUpdateVeiculo(OracleCommand cmd, Veiculo veiculo)
+    {
+        cmd.BindByName = true;
+        cmd.CommandText = """
+                          UPDATE VEICULO
+                          SET MARCA = :marca,
+                              MODELO = :modelo,
+                              ANO = :ano,
+                              COR = :cor,
+                              PRECO = :preco,
+                              TIPO = :tipo,
+                              SITUACAO = :situacao,
+                              QUILOMETRAGEM = :quilometragem
+                          WHERE ID = :id
+                          """;
+
+        cmd.Parameters.Add(new OracleParameter("marca", OracleDbType.Varchar2) { Value = veiculo.Marca });
+        cmd.Parameters.Add(new OracleParameter("modelo", OracleDbType.Varchar2) { Value = veiculo.Modelo });
+        cmd.Parameters.Add(new OracleParameter("ano", OracleDbType.Int32) { Value = veiculo.Ano });
+        cmd.Parameters.Add(new OracleParameter("cor", OracleDbType.Varchar2) { Value = veiculo.Cor });
+        cmd.Parameters.Add(new OracleParameter("preco", OracleDbType.Decimal) { Value = veiculo.Preco });
+        cmd.Parameters.Add(new OracleParameter("tipo", OracleDbType.Varchar2) { Value = veiculo.Tipo });
+        cmd.Parameters.Add(new OracleParameter("situacao", OracleDbType.Varchar2) { Value = veiculo.Situacao });
+        cmd.Parameters.Add(new OracleParameter("quilometragem", OracleDbType.Int32) { Value = veiculo.Quilometragem });
+        cmd.Parameters.Add(new OracleParameter("id", OracleDbType.Int32) { Value = veiculo.Id });
     }
 
     public async Task RemoverVeiculoAsync(int id)
