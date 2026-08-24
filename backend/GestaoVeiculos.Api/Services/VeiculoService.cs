@@ -9,9 +9,12 @@ using ValidationException = GestaoVeiculos.Api.Domain.Exceptions.ValidationExcep
 
 namespace GestaoVeiculos.Api.Services;
 
-public class VeiculoService(IVeiculoRepository veiculoRepository) : IVeiculoService
+public class VeiculoService(
+    IVeiculoRepository veiculoRepository,
+    IProprietarioRepository proprietarioRepository) : IVeiculoService
 {
     private readonly IVeiculoRepository _veiculoRepository = veiculoRepository;
+    private readonly IProprietarioRepository _proprietarioRepository = proprietarioRepository;
 
     public async Task<ResultadoResponse<VeiculoResponse>> CriarVeiculoAsync(CriarVeiculoRequest request)
     {
@@ -47,7 +50,11 @@ public class VeiculoService(IVeiculoRepository veiculoRepository) : IVeiculoServ
         if (veiculo is null)
             throw new NotFoundException($"Veículo {id} não encontrado.");
 
-        return new ResultadoResponse<VeiculoDetalheResponse>((VeiculoDetalheResponse)veiculo);
+        var proprietarios = await _proprietarioRepository.ListarPorVeiculoAsync(id);
+
+        var detalhe = VeiculoDetalheResponse.De(veiculo, proprietarios);
+
+        return new ResultadoResponse<VeiculoDetalheResponse>(detalhe);
     }
 
     public async Task<ResultadoPaginadoResponse<VeiculoResponse>> ListarVeiculosAsync(ListarVeiculosPageOption pageOption)

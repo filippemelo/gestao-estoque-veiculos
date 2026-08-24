@@ -1,4 +1,4 @@
-﻿using GestaoVeiculos.Api.Domain.Entities;
+using GestaoVeiculos.Api.Domain.Entities;
 
 namespace GestaoVeiculos.Api.Models.Responses;
 
@@ -12,9 +12,10 @@ public sealed record VeiculoDetalheResponse(
     string Tipo,
     string Situacao,
     string Placa,
-    int Quilometragem)
+    int Quilometragem,
+    IEnumerable<ProprietarioResponse> Proprietarios)
 {
-    public static explicit operator VeiculoDetalheResponse(Veiculo veiculo)
+    public static VeiculoDetalheResponse De(Veiculo veiculo, IEnumerable<Proprietario> proprietarios)
     {
         return new VeiculoDetalheResponse(
             veiculo.Id,
@@ -26,7 +27,7 @@ public sealed record VeiculoDetalheResponse(
             veiculo.Tipo,
             veiculo.Situacao,
             veiculo.Placa,
-            veiculo.Quilometragem
-        );
+            veiculo.Quilometragem,
+            proprietarios.Select(p => (ProprietarioResponse)p));
     }
 }

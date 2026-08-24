@@ -5,7 +5,7 @@ namespace GestaoVeiculos.Api.Repositories;
 
 public interface IVeiculoRepository
 {
-    Task<(IReadOnlyList<Veiculo> Itens, int Total)> ListarVeiculosAsync(ListarVeiculosPageOption pageOption);
+    Task<(IEnumerable<Veiculo> Itens, int Total)> ListarVeiculosAsync(ListarVeiculosPageOption pageOption);
     Task<Veiculo?> ObterVeiculoAsync(int id);
     Task<Veiculo?> ObterVeiculoPorPlacaAsync(string placa);
     Task<int> InserirVeiculoAsync(Veiculo veiculo);

@@ -13,7 +13,7 @@ public class VeiculoRepository(IConexaoFactory conexaoFactory) : IVeiculoReposit
 {
     private readonly IConexaoFactory _conexaoFactory = conexaoFactory;
 
-    public async Task<(IReadOnlyList<Veiculo> Itens, int Total)> ListarVeiculosAsync(ListarVeiculosPageOption pageOption)
+    public async Task<(IEnumerable<Veiculo> Itens, int Total)> ListarVeiculosAsync(ListarVeiculosPageOption pageOption)
     {
         var where = new StringBuilder();
         var filtros = new List<OracleParameter>();
