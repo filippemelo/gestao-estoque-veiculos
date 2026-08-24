@@ -21,7 +21,11 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
     {
         var (status, title) = Mapear(exception);
 
-        if (status >= StatusCodes.Status500InternalServerError)
+        if (exception is InfrastructureException infra)
+        {
+            _logger.LogError(infra.InnerCause, "Falha de infraestrutura: {Mensagem}", infra.Message);
+        }
+        else if (status >= StatusCodes.Status500InternalServerError)
         {
             _logger.LogError(exception, "Erro não tratado: {Mensagem}", exception.Message);
         }
@@ -34,7 +38,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         {
             Status = status,
             Title = title,
-            Detail = status >= StatusCodes.Status500InternalServerError
+            Detail = status == StatusCodes.Status500InternalServerError
                 ? "Ocorreu um erro inesperado. Tente novamente mais tarde."
                 : exception.Message,
             Type = $"https://httpstatuses.io/{status}",
@@ -54,6 +58,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         NotFoundException => (StatusCodes.Status404NotFound, "Recurso não encontrado"),
         ValidationException => (StatusCodes.Status400BadRequest, "Requisição inválida"),
         ConflictException => (StatusCodes.Status409Conflict, "Conflito de estado"),
+        InfrastructureException => (StatusCodes.Status503ServiceUnavailable, "Serviço indisponível"),
         _ => (StatusCodes.Status500InternalServerError, "Erro interno do servidor")
     };
 }

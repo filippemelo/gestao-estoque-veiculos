@@ -6,7 +6,8 @@ public interface IVeiculoRepository
 {
     Task<IEnumerable<Veiculo>> ListarVeiculosAsync();
     Task<Veiculo?> ObterVeiculoAsync(int id);
-    Task InserirVeiculoAsync(Veiculo veiculo);
+    Task<Veiculo?> ObterVeiculoPorPlacaAsync(string placa);
+    Task<int> InserirVeiculoAsync(Veiculo veiculo);
     Task AtualizarVeiculoAsync(Veiculo veiculo);
     Task RemoverVeiculoAsync(int id);
 }

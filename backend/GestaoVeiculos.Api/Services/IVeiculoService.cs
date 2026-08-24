@@ -5,5 +5,5 @@ namespace GestaoVeiculos.Api.Services;
 
 public interface IVeiculoService
 {
-    Task<VeiculoResponse> CriarAsync(CriarVeiculoRequest request);
+    Task<VeiculoResponse> CriarVeiculoAsync(CriarVeiculoRequest request);
 }
