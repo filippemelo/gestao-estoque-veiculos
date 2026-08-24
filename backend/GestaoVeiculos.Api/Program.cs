@@ -6,6 +6,17 @@ using GestaoVeiculos.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+const string corsPolicy = "Frontend";
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(corsPolicy, policy =>
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -32,7 +43,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("", () => Results.Ok( new { dataHora = DateTime.UtcNow.ToShortTimeString(), 
+app.UseCors(corsPolicy);
+
+app.MapGet("", () => Results.Ok( new { dataHora = DateTime.UtcNow.ToShortTimeString(),
         mensagem = "Operação realizada com sucesso!" })).WithName("Health Check");
 
 app.AddVeiculoEnpoint();
