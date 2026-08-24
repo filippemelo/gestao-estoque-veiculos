@@ -1,4 +1,5 @@
-﻿using GestaoVeiculos.Api.Models.Requests;
+﻿using GestaoVeiculos.Api.Models.Filters;
+using GestaoVeiculos.Api.Models.Requests;
 using GestaoVeiculos.Api.Services;
 
 namespace GestaoVeiculos.Api.Endpoints;
@@ -14,10 +15,17 @@ public static class VeiculoEndpoint
             var veiculo = await service.CriarVeiculoAsync(request);
             return Results.Created($"/veiculos/{veiculo.Id}", veiculo);
         });
-        
-        group.MapGet("{id:int}", async (int id) =>
+
+        group.MapGet("", async ([AsParameters] ListarVeiculosFilter filter, IVeiculoService service) =>
         {
-            return Results.Ok();
+            var resultado = await service.ListarVeiculosAsync(filter);
+            return Results.Ok(resultado);
+        });
+
+        group.MapGet("{id:int}", async (int id, IVeiculoService service) =>
+        {
+            var veiculo = await service.ObterVeiculoAsync(id);
+            return Results.Ok(veiculo);
         });
     }
 }

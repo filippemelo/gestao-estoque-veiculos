@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using GestaoVeiculos.Api.Domain.Entities;
 using GestaoVeiculos.Api.Domain.Exceptions;
+using GestaoVeiculos.Api.Models.Filters;
 using GestaoVeiculos.Api.Models.Requests;
 using GestaoVeiculos.Api.Models.Responses;
 using GestaoVeiculos.Api.Repositories;
@@ -14,7 +15,7 @@ public class VeiculoService(IVeiculoRepository veiculoRepository) : IVeiculoServ
 
     public async Task<VeiculoResponse> CriarVeiculoAsync(CriarVeiculoRequest request)
     {
-        ValidarCampos(request);
+        Validar(request);
 
         var jaExiste = await _veiculoRepository.ObterVeiculoPorPlacaAsync(request.Placa);
         if (jaExiste is not null)
@@ -39,7 +40,28 @@ public class VeiculoService(IVeiculoRepository veiculoRepository) : IVeiculoServ
         return (VeiculoResponse)criado;
     }
 
-    private static void ValidarCampos(CriarVeiculoRequest request)
+    public async Task<VeiculoDetalheResponse> ObterVeiculoAsync(int id)
+    {
+        var veiculo = await _veiculoRepository.ObterVeiculoAsync(id);
+
+        if (veiculo is null)
+            throw new NotFoundException($"Veículo {id} não encontrado.");
+
+        return (VeiculoDetalheResponse)veiculo;
+    }
+
+    public async Task<PaginacaoResponse<VeiculoResponse>> ListarVeiculosAsync(ListarVeiculosFilter filter)
+    {
+        Validar(filter);
+
+        var (itens, total) = await _veiculoRepository.ListarVeiculosAsync(filter);
+
+        var respostas = itens.Select(v => (VeiculoResponse)v).ToList();
+
+        return new PaginacaoResponse<VeiculoResponse>(respostas, filter.Page, filter.PageSize, total);
+    }
+
+    private static void Validar(object request)
     {
         var contexto = new ValidationContext(request);
         var resultados = new List<ValidationResult>();

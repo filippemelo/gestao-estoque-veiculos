@@ -1,7 +1,9 @@
 ﻿using System.Data;
+using System.Text;
 using GestaoVeiculos.Api.Data;
 using GestaoVeiculos.Api.Data.Mappers;
 using GestaoVeiculos.Api.Domain.Entities;
+using GestaoVeiculos.Api.Models.Filters;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 
@@ -11,10 +13,77 @@ public class VeiculoRepository(IConexaoFactory conexaoFactory) : IVeiculoReposit
 {
     private readonly IConexaoFactory _conexaoFactory = conexaoFactory;
 
-    public Task<IEnumerable<Veiculo>> ListarVeiculosAsync()
+    public async Task<(IReadOnlyList<Veiculo> Itens, int Total)> ListarVeiculosAsync(ListarVeiculosFilter filter)
     {
-        throw new NotImplementedException();
+        var where = new StringBuilder();
+        var filtros = new List<OracleParameter>();
+
+        if (!string.IsNullOrWhiteSpace(filter.Marca))
+        {
+            where.Append(where.Length == 0 ? " WHERE " : " AND ");
+            where.Append("UPPER(MARCA) LIKE UPPER(:marca) || '%'");
+            filtros.Add(new OracleParameter("marca", OracleDbType.Varchar2) { Value = filter.Marca });
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.Situacao))
+        {
+            where.Append(where.Length == 0 ? " WHERE " : " AND ");
+            where.Append("SITUACAO = :situacao");
+            filtros.Add(new OracleParameter("situacao", OracleDbType.Varchar2) { Value = filter.Situacao });
+        }
+
+        var sqlCount = $"SELECT COUNT(*) FROM VEICULO{where}";
+        var sqlItens = $"""
+                        SELECT ID, MARCA, MODELO, ANO, COR, PRECO, TIPO, SITUACAO, PLACA, QUILOMETRAGEM
+                        FROM VEICULO
+                        {where}
+                        ORDER BY ID
+                        OFFSET :offset ROWS FETCH NEXT :pageSize ROWS ONLY
+                        """;
+
+        var offset = (filter.Page - 1) * filter.PageSize;
+
+        try
+        {
+            await using var conexao = _conexaoFactory.CriarConexao();
+            await conexao.OpenAsync();
+
+            await using var cmdCount = conexao.CreateCommand();
+            cmdCount.BindByName = true;
+            cmdCount.CommandText = sqlCount;
+            foreach (var p in filtros)
+                cmdCount.Parameters.Add(Clonar(p));
+
+            var totalObj = await cmdCount.ExecuteScalarAsync();
+            var total = Convert.ToInt32(totalObj);
+
+            if (total == 0)
+                return (Array.Empty<Veiculo>(), 0);
+
+            await using var cmdItens = conexao.CreateCommand();
+            cmdItens.BindByName = true;
+            cmdItens.CommandText = sqlItens;
+            foreach (var p in filtros)
+                cmdItens.Parameters.Add(Clonar(p));
+            cmdItens.Parameters.Add(new OracleParameter("offset", OracleDbType.Int32) { Value = offset });
+            cmdItens.Parameters.Add(new OracleParameter("pageSize", OracleDbType.Int32) { Value = filter.PageSize });
+
+            await using var reader = await cmdItens.ExecuteReaderAsync();
+
+            var itens = new List<Veiculo>();
+            while (await reader.ReadAsync())
+                itens.Add(VeiculoMapper.MapearVeiculo(reader));
+
+            return (itens, total);
+        }
+        catch (OracleException ex)
+        {
+            throw OracleExceptionTranslator.Traduzir(ex);
+        }
     }
+
+    private static OracleParameter Clonar(OracleParameter origem) =>
+        new(origem.ParameterName, origem.OracleDbType) { Value = origem.Value };
 
     public async Task<Veiculo?> ObterVeiculoAsync(int id)
     {
