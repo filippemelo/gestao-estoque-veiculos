@@ -34,9 +34,11 @@ export type Proprietario = {
   isProprietarioAtual: boolean
 }
 
-// Detalhe do veículo já vem com o histórico de proprietários embutido.
+// Detalhe do veículo — normalmente vem com o histórico de proprietários
+// embutido. Marcado como opcional para o consumidor ter fallback explícito
+// (chamar /proprietarios/veiculo/{id}) caso o backend um dia deixe de embutir.
 export type VeiculoDetalhe = Veiculo & {
-  proprietarios: Proprietario[]
+  proprietarios?: Proprietario[]
 }
 
 // -------------------- Requests --------------------
