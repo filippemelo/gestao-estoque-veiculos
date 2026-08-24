@@ -3,7 +3,7 @@ using System.Text;
 using GestaoVeiculos.Api.Data;
 using GestaoVeiculos.Api.Data.Mappers;
 using GestaoVeiculos.Api.Domain.Entities;
-using GestaoVeiculos.Api.Models.Filters;
+using GestaoVeiculos.Api.Models.PageOptions;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 
@@ -13,23 +13,23 @@ public class VeiculoRepository(IConexaoFactory conexaoFactory) : IVeiculoReposit
 {
     private readonly IConexaoFactory _conexaoFactory = conexaoFactory;
 
-    public async Task<(IReadOnlyList<Veiculo> Itens, int Total)> ListarVeiculosAsync(ListarVeiculosFilter filter)
+    public async Task<(IReadOnlyList<Veiculo> Itens, int Total)> ListarVeiculosAsync(ListarVeiculosPageOption pageOption)
     {
         var where = new StringBuilder();
         var filtros = new List<OracleParameter>();
 
-        if (!string.IsNullOrWhiteSpace(filter.Marca))
+        if (!string.IsNullOrWhiteSpace(pageOption.Marca))
         {
             where.Append(where.Length == 0 ? " WHERE " : " AND ");
             where.Append("UPPER(MARCA) LIKE UPPER(:marca) || '%'");
-            filtros.Add(new OracleParameter("marca", OracleDbType.Varchar2) { Value = filter.Marca });
+            filtros.Add(new OracleParameter("marca", OracleDbType.Varchar2) { Value = pageOption.Marca });
         }
 
-        if (!string.IsNullOrWhiteSpace(filter.Situacao))
+        if (!string.IsNullOrWhiteSpace(pageOption.Situacao))
         {
             where.Append(where.Length == 0 ? " WHERE " : " AND ");
             where.Append("SITUACAO = :situacao");
-            filtros.Add(new OracleParameter("situacao", OracleDbType.Varchar2) { Value = filter.Situacao });
+            filtros.Add(new OracleParameter("situacao", OracleDbType.Varchar2) { Value = pageOption.Situacao });
         }
 
         var sqlCount = $"SELECT COUNT(*) FROM VEICULO{where}";
@@ -41,7 +41,7 @@ public class VeiculoRepository(IConexaoFactory conexaoFactory) : IVeiculoReposit
                         OFFSET :offset ROWS FETCH NEXT :pageSize ROWS ONLY
                         """;
 
-        var offset = (filter.Page - 1) * filter.PageSize;
+        var offset = (pageOption.Page - 1) * pageOption.PageSize;
 
         try
         {
@@ -66,7 +66,7 @@ public class VeiculoRepository(IConexaoFactory conexaoFactory) : IVeiculoReposit
             foreach (var p in filtros)
                 cmdItens.Parameters.Add(Clonar(p));
             cmdItens.Parameters.Add(new OracleParameter("offset", OracleDbType.Int32) { Value = offset });
-            cmdItens.Parameters.Add(new OracleParameter("pageSize", OracleDbType.Int32) { Value = filter.PageSize });
+            cmdItens.Parameters.Add(new OracleParameter("pageSize", OracleDbType.Int32) { Value = pageOption.PageSize });
 
             await using var reader = await cmdItens.ExecuteReaderAsync();
 

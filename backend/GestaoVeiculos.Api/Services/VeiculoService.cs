@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using GestaoVeiculos.Api.Domain.Entities;
 using GestaoVeiculos.Api.Domain.Exceptions;
-using GestaoVeiculos.Api.Models.Filters;
+using GestaoVeiculos.Api.Models.PageOptions;
 using GestaoVeiculos.Api.Models.Requests;
 using GestaoVeiculos.Api.Models.Responses;
 using GestaoVeiculos.Api.Repositories;
@@ -13,7 +13,7 @@ public class VeiculoService(IVeiculoRepository veiculoRepository) : IVeiculoServ
 {
     private readonly IVeiculoRepository _veiculoRepository = veiculoRepository;
 
-    public async Task<VeiculoResponse> CriarVeiculoAsync(CriarVeiculoRequest request)
+    public async Task<ResultadoResponse<VeiculoResponse>> CriarVeiculoAsync(CriarVeiculoRequest request)
     {
         Validar(request);
 
@@ -37,28 +37,28 @@ public class VeiculoService(IVeiculoRepository veiculoRepository) : IVeiculoServ
             veiculo.Placa,
             veiculo.Quilometragem);
 
-        return (VeiculoResponse)criado;
+        return new ResultadoResponse<VeiculoResponse>((VeiculoResponse)criado);
     }
 
-    public async Task<VeiculoDetalheResponse> ObterVeiculoAsync(int id)
+    public async Task<ResultadoResponse<VeiculoDetalheResponse>> ObterVeiculoAsync(int id)
     {
         var veiculo = await _veiculoRepository.ObterVeiculoAsync(id);
 
         if (veiculo is null)
             throw new NotFoundException($"Veículo {id} não encontrado.");
 
-        return (VeiculoDetalheResponse)veiculo;
+        return new ResultadoResponse<VeiculoDetalheResponse>((VeiculoDetalheResponse)veiculo);
     }
 
-    public async Task<PaginacaoResponse<VeiculoResponse>> ListarVeiculosAsync(ListarVeiculosFilter filter)
+    public async Task<ResultadoPaginadoResponse<VeiculoResponse>> ListarVeiculosAsync(ListarVeiculosPageOption pageOption)
     {
-        Validar(filter);
+        Validar(pageOption);
 
-        var (itens, total) = await _veiculoRepository.ListarVeiculosAsync(filter);
+        var (itens, total) = await _veiculoRepository.ListarVeiculosAsync(pageOption);
 
         var respostas = itens.Select(v => (VeiculoResponse)v).ToList();
 
-        return new PaginacaoResponse<VeiculoResponse>(respostas, filter.Page, filter.PageSize, total);
+        return new ResultadoPaginadoResponse<VeiculoResponse>(respostas, pageOption.Page, pageOption.PageSize, total);
     }
 
     private static void Validar(object request)

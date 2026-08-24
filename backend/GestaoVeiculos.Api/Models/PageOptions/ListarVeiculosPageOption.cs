@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace GestaoVeiculos.Api.Models.Filters;
+namespace GestaoVeiculos.Api.Models.PageOptions;
 
-public sealed record ListarVeiculosFilter(
+public sealed record ListarVeiculosPageOption(
     [StringLength(50)] string? Marca = null,
     [StringLength(30)] string? Situacao = null,
     [Range(1, int.MaxValue)] int Page = 1,

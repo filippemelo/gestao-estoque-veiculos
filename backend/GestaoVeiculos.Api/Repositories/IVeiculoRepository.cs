@@ -1,11 +1,11 @@
 ﻿using GestaoVeiculos.Api.Domain.Entities;
-using GestaoVeiculos.Api.Models.Filters;
+using GestaoVeiculos.Api.Models.PageOptions;
 
 namespace GestaoVeiculos.Api.Repositories;
 
 public interface IVeiculoRepository
 {
-    Task<(IReadOnlyList<Veiculo> Itens, int Total)> ListarVeiculosAsync(ListarVeiculosFilter filter);
+    Task<(IReadOnlyList<Veiculo> Itens, int Total)> ListarVeiculosAsync(ListarVeiculosPageOption pageOption);
     Task<Veiculo?> ObterVeiculoAsync(int id);
     Task<Veiculo?> ObterVeiculoPorPlacaAsync(string placa);
     Task<int> InserirVeiculoAsync(Veiculo veiculo);
