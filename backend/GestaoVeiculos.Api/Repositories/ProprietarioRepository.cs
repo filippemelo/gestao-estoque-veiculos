@@ -2,6 +2,7 @@ using System.Data;
 using GestaoVeiculos.Api.Data;
 using GestaoVeiculos.Api.Data.Mappers;
 using GestaoVeiculos.Api.Domain.Entities;
+using GestaoVeiculos.Api.Models.PageOptions;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 
@@ -11,9 +12,51 @@ public class ProprietarioRepository(IConexaoFactory conexaoFactory) : IProprieta
 {
     private readonly IConexaoFactory _conexaoFactory = conexaoFactory;
 
-    public Task<IEnumerable<Proprietario>> ListarProprietariosAsync()
+    public async Task<(IEnumerable<Proprietario> Itens, int Total)> ListarProprietariosAsync(ListarProprietariosPageOption pageOption)
     {
-        throw new NotImplementedException();
+        const string sqlCount = "SELECT COUNT(*) FROM PROPRIETARIO";
+        const string sqlItens = """
+                                SELECT ID, VEICULO_ID, NOME_COMPLETO, CPF, DATA_AQUISICAO, DATA_VENDA, OBSERVACAO
+                                FROM PROPRIETARIO
+                                ORDER BY ID
+                                OFFSET :offset ROWS FETCH NEXT :pageSize ROWS ONLY
+                                """;
+
+        var offset = (pageOption.Page - 1) * pageOption.PageSize;
+
+        try
+        {
+            await using var conexao = _conexaoFactory.CriarConexao();
+            await conexao.OpenAsync();
+
+            await using var cmdCount = conexao.CreateCommand();
+            cmdCount.BindByName = true;
+            cmdCount.CommandText = sqlCount;
+
+            var totalObj = await cmdCount.ExecuteScalarAsync();
+            var total = Convert.ToInt32(totalObj);
+
+            if (total == 0)
+                return (Array.Empty<Proprietario>(), 0);
+
+            await using var cmdItens = conexao.CreateCommand();
+            cmdItens.BindByName = true;
+            cmdItens.CommandText = sqlItens;
+            cmdItens.Parameters.Add(new OracleParameter("offset", OracleDbType.Int32) { Value = offset });
+            cmdItens.Parameters.Add(new OracleParameter("pageSize", OracleDbType.Int32) { Value = pageOption.PageSize });
+
+            await using var reader = await cmdItens.ExecuteReaderAsync();
+
+            var itens = new List<Proprietario>();
+            while (await reader.ReadAsync())
+                itens.Add(ProprietarioMapper.MapearProprietario(reader));
+
+            return (itens, total);
+        }
+        catch (OracleException ex)
+        {
+            throw OracleExceptionTranslator.Traduzir(ex);
+        }
     }
 
     public async Task<IEnumerable<Proprietario>> ListarPorVeiculoAsync(int veiculoId)

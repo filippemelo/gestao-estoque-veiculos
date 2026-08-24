@@ -1,3 +1,4 @@
+using GestaoVeiculos.Api.Models.PageOptions;
 using GestaoVeiculos.Api.Models.Requests;
 using GestaoVeiculos.Api.Services;
 
@@ -13,6 +14,12 @@ public static class ProprietarioEndpoint
         {
             var resposta = await service.CriarProprietarioAsync(request);
             return Results.Created($"/proprietarios/{resposta.Dados.Id}", resposta);
+        });
+
+        group.MapGet("", async ([AsParameters] ListarProprietariosPageOption pageOption, IProprietarioService service) =>
+        {
+            var resposta = await service.ListarProprietariosAsync(pageOption);
+            return Results.Ok(resposta);
         });
 
         group.MapGet("veiculo/{veiculoId:int}", async (int veiculoId, IProprietarioService service) =>

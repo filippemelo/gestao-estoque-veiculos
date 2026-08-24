@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using GestaoVeiculos.Api.Domain.Entities;
 using GestaoVeiculos.Api.Domain.Exceptions;
+using GestaoVeiculos.Api.Models.PageOptions;
 using GestaoVeiculos.Api.Models.Requests;
 using GestaoVeiculos.Api.Models.Responses;
 using GestaoVeiculos.Api.Repositories;
@@ -49,6 +50,17 @@ public class ProprietarioService(
             request.Observacao);
 
         return new ResultadoResponse<ProprietarioResponse>((ProprietarioResponse)criado);
+    }
+
+    public async Task<ResultadoPaginadoResponse<ProprietarioResponse>> ListarProprietariosAsync(ListarProprietariosPageOption pageOption)
+    {
+        Validar(pageOption);
+
+        var (itens, total) = await _proprietarioRepository.ListarProprietariosAsync(pageOption);
+
+        var respostas = itens.Select(p => (ProprietarioResponse)p).ToList();
+
+        return new ResultadoPaginadoResponse<ProprietarioResponse>(respostas, pageOption.Page, pageOption.PageSize, total);
     }
 
     public async Task<ResultadoResponse<IEnumerable<ProprietarioResponse>>> ListarPorVeiculoAsync(int veiculoId)
