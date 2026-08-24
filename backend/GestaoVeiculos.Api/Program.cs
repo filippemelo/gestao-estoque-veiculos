@@ -1,5 +1,6 @@
 using GestaoVeiculos.Api.Data;
 using GestaoVeiculos.Api.Endpoints;
+using GestaoVeiculos.Api.Infrastructure.ExceptionHandling;
 using GestaoVeiculos.Api.Repositories;
 using GestaoVeiculos.Api.Services;
 
@@ -16,7 +17,12 @@ builder.Services.AddScoped<IProprietarioRepository, ProprietarioRepository>();
 builder.Services.AddScoped<IVeiculoService, VeiculoService>();
 builder.Services.AddScoped<IProprietarioService, ProprietarioService>();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
