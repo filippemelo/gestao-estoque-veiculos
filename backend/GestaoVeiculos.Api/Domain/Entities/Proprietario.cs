@@ -22,4 +22,15 @@ public class Proprietario
     public string? Observacao { get; private set; }
     
     public bool IsProprietarioAtual => DataVenda is null;
+    
+    
+    public static Proprietario Reconstituir(
+        int id, int veiculoId, string nomeCompleto, string cpf,
+        DateTime dataAquisicao, DateTime? dataVenda, string? observacao)
+    {
+        var proprietario = new Proprietario(veiculoId, nomeCompleto, cpf, dataAquisicao, observacao);
+        proprietario.Id = id;
+        proprietario.DataVenda = dataVenda;
+        return proprietario;
+    }
 }

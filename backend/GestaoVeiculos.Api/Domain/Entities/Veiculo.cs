@@ -28,4 +28,14 @@ public sealed class Veiculo
     public int Quilometragem { get; private set; }
     
     public List<Proprietario> Proprietarios { get; set; } = [];
+
+
+    public static Veiculo Reconstituir(
+        int id, string marca, string modelo, int ano, string cor,
+        decimal preco, string tipo, string situacao, string placa, int quilometragem)
+    {
+        var veiculo = new Veiculo(marca, modelo, ano, cor, preco, tipo, situacao, placa, quilometragem);
+        veiculo.Id = id;
+        return veiculo;
+    }
 }
