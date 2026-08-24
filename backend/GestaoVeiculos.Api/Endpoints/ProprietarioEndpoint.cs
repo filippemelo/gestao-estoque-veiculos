@@ -20,5 +20,11 @@ public static class ProprietarioEndpoint
             var resposta = await service.ListarPorVeiculoAsync(veiculoId);
             return Results.Ok(resposta);
         });
+
+        group.MapPut("{id:int}", async (int id, AtualizarProprietarioRequest request, IProprietarioService service) =>
+        {
+            var resposta = await service.AtualizarProprietarioAsync(id, request);
+            return Results.Ok(resposta);
+        });
     }
 }
