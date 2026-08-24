@@ -1,6 +1,9 @@
-﻿namespace GestaoVeiculos.Api.Services;
+using GestaoVeiculos.Api.Models.Requests;
+using GestaoVeiculos.Api.Models.Responses;
+
+namespace GestaoVeiculos.Api.Services;
 
 public interface IProprietarioService
 {
-    
+    Task<ResultadoResponse<ProprietarioResponse>> CriarProprietarioAsync(CriarProprietarioRequest request);
 }

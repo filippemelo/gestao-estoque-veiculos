@@ -36,5 +36,6 @@ app.MapGet("", () => Results.Ok( new { dataHora = DateTime.UtcNow.ToShortTimeStr
         mensagem = "Operação realizada com sucesso!" })).WithName("Health Check");
 
 app.AddVeiculoEnpoint();
+app.AddProprietarioEndpoint();
 
 app.Run();
