@@ -27,5 +27,11 @@ public static class VeiculoEndpoint
             var veiculo = await service.ObterVeiculoAsync(id);
             return Results.Ok(veiculo);
         });
+
+        group.MapDelete("{id:int}", async (int id, IVeiculoService service) =>
+        {
+            await service.ExcluirVeiculoAsync(id);
+            return Results.NoContent();
+        });
     }
 }

@@ -68,6 +68,20 @@ public class VeiculoService(
         return new ResultadoPaginadoResponse<VeiculoResponse>(respostas, pageOption.Page, pageOption.PageSize, total);
     }
 
+    public async Task ExcluirVeiculoAsync(int id)
+    {
+        var veiculo = await _veiculoRepository.ObterVeiculoAsync(id);
+
+        if (veiculo is null)
+            throw new NotFoundException($"Veículo {id} não encontrado.");
+
+        if (await _proprietarioRepository.ExisteProprietarioVeiculoAsync(id))
+            throw new ConflictException(
+                $"Não é possível excluir o veículo {id}: existem proprietários cadastrados.");
+
+        await _veiculoRepository.RemoverVeiculoAsync(id);
+    }
+
     private static void Validar(object request)
     {
         var contexto = new ValidationContext(request);

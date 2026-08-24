@@ -48,6 +48,35 @@ public class ProprietarioRepository(IConexaoFactory conexaoFactory) : IProprieta
         }
     }
 
+    public async Task<bool> ExisteProprietarioVeiculoAsync(int veiculoId)
+    {
+        const string sql = """
+                           SELECT 1 FROM PROPRIETARIO
+                           WHERE VEICULO_ID = :veiculoId
+                           FETCH FIRST 1 ROW ONLY
+                           """;
+
+        try
+        {
+            await using var conexao = _conexaoFactory.CriarConexao();
+            await conexao.OpenAsync();
+
+            await using var cmd = conexao.CreateCommand();
+            cmd.BindByName = true;
+            cmd.CommandText = sql;
+
+            cmd.Parameters.Add(new OracleParameter("veiculoId", OracleDbType.Int32) { Value = veiculoId });
+
+            var resultado = await cmd.ExecuteScalarAsync();
+
+            return resultado is not null;
+        }
+        catch (OracleException ex)
+        {
+            throw OracleExceptionTranslator.Traduzir(ex);
+        }
+    }
+
     public Task<Proprietario> ObterProprietarioAsync(int id)
     {
         throw new NotImplementedException();

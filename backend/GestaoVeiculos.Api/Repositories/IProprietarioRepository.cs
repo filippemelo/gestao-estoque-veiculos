@@ -6,6 +6,7 @@ public interface IProprietarioRepository
 {
     Task<IEnumerable<Proprietario>> ListarProprietariosAsync();
     Task<IEnumerable<Proprietario>> ListarPorVeiculoAsync(int veiculoId);
+    Task<bool> ExisteProprietarioVeiculoAsync(int veiculoId);
     Task<Proprietario> ObterProprietarioAsync(int id);
     Task InserirProprietarioAsync(Proprietario proprietario);
     Task RemoverProprietarioAsync(int id);

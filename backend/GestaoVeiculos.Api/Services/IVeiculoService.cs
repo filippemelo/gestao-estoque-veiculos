@@ -9,4 +9,5 @@ public interface IVeiculoService
     Task<ResultadoResponse<VeiculoResponse>> CriarVeiculoAsync(CriarVeiculoRequest request);
     Task<ResultadoResponse<VeiculoDetalheResponse>> ObterVeiculoAsync(int id);
     Task<ResultadoPaginadoResponse<VeiculoResponse>> ListarVeiculosAsync(ListarVeiculosPageOption pageOption);
+    Task ExcluirVeiculoAsync(int id);
 }
