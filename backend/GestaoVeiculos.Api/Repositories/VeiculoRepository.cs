@@ -5,9 +5,9 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace GestaoVeiculos.Api.Repositories;
 
-public class VeiculoRepository(ConexaoFactory conexaoFactory) : IVeiculoRepository
+public class VeiculoRepository(IConexaoFactory conexaoFactory) : IVeiculoRepository
 {
-    private readonly ConexaoFactory _conexaoFactory = conexaoFactory;
+    private readonly IConexaoFactory _conexaoFactory = conexaoFactory;
 
     public Task<IEnumerable<Veiculo>> ListarVeiculosAsync()
     {
