@@ -1,18 +1,22 @@
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ApiError } from '@/api/http'
-import { Button, ErrorState, Skeleton, useToast } from '@/components/ui'
+import { Button, ErrorState, Skeleton } from '@/components/ui'
 import { HistoricoProprietarios } from '@/features/proprietarios/HistoricoProprietarios'
 import { useProprietariosDoVeiculoQuery } from '@/features/proprietarios/hooks/useProprietariosDoVeiculoQuery'
+import { ModalAdicionarProprietario } from '@/features/proprietarios/ModalAdicionarProprietario'
+import { AcaoExcluirVeiculo } from '@/features/veiculos/AcaoExcluirVeiculo'
 import { DadosDoVeiculo } from '@/features/veiculos/DadosDoVeiculo'
 import { useVeiculoDetalheQuery } from '@/features/veiculos/hooks/useVeiculoDetalheQuery'
 
 export function VeiculoDetalhePage() {
   const navigate = useNavigate()
-  const toast = useToast()
   const { id: idParam } = useParams<{ id: string }>()
   const id = Number(idParam)
   const idValido = Number.isFinite(id) && id > 0
+
+  const [adicionarAberto, setAdicionarAberto] = useState(false)
 
   const veiculoQuery = useVeiculoDetalheQuery(id, idValido)
 
@@ -31,14 +35,6 @@ export function VeiculoDetalhePage() {
   const erroProprietarios = precisaFallback ? proprietariosQuery.error : undefined
   const temProprietarioAtual =
     (proprietarios ?? []).some((p) => p.isProprietarioAtual) || false
-
-  function avisoEmConstrucao(mensagem: string) {
-    toast.show({
-      variant: 'info',
-      title: 'Ação disponível na próxima etapa',
-      description: mensagem,
-    })
-  }
 
   // -------------------- Estados de topo --------------------
   if (!idValido) return <NaoEncontrado navigate={navigate} descricao="Identificador inválido." />
@@ -102,14 +98,7 @@ export function VeiculoDetalhePage() {
           <Link to={`/veiculos/${veiculo.id}/editar`}>
             <Button variant="secondary">Editar</Button>
           </Link>
-          <Button
-            variant="danger"
-            onClick={() =>
-              avisoEmConstrucao('A exclusão do veículo será implementada em breve.')
-            }
-          >
-            Excluir
-          </Button>
+          <AcaoExcluirVeiculo veiculo={veiculo} proprietarios={proprietarios} />
         </div>
       </header>
 
@@ -121,9 +110,13 @@ export function VeiculoDetalhePage() {
         erro={erroProprietarios}
         onTentarNovamente={() => proprietariosQuery.refetch()}
         temProprietarioAtual={temProprietarioAtual}
-        onAdicionar={() =>
-          avisoEmConstrucao('O cadastro de novo proprietário será implementado em breve.')
-        }
+        onAdicionar={() => setAdicionarAberto(true)}
+      />
+
+      <ModalAdicionarProprietario
+        aberto={adicionarAberto}
+        onFechar={() => setAdicionarAberto(false)}
+        veiculoId={veiculo.id}
       />
     </div>
   )

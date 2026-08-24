@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 
 import type { Proprietario } from '@/api/types'
 import {
@@ -16,6 +17,9 @@ import {
 } from '@/components/ui'
 import { cn } from '@/lib/cn'
 import { formatarCPF, formatarData } from '@/lib/format'
+
+import { AcaoExcluirProprietario } from './AcaoExcluirProprietario'
+import { ModalEditarProprietario } from './ModalEditarProprietario'
 
 type Props = {
   proprietarios: Proprietario[] | undefined
@@ -37,6 +41,9 @@ export function HistoricoProprietarios({
   onAdicionar,
   temProprietarioAtual,
 }: Props) {
+  // Um único estado para o modal editar — abre para o proprietário selecionado.
+  const [editando, setEditando] = useState<Proprietario | null>(null)
+
   return (
     <section
       aria-label="Histórico de proprietários"
@@ -65,6 +72,12 @@ export function HistoricoProprietarios({
       </header>
 
       {renderConteudo()}
+
+      <ModalEditarProprietario
+        aberto={editando !== null}
+        onFechar={() => setEditando(null)}
+        proprietario={editando}
+      />
     </section>
   )
 
@@ -99,6 +112,7 @@ export function HistoricoProprietarios({
             <TH className="w-32">Aquisição</TH>
             <TH className="w-32">Venda</TH>
             <TH>Observação</TH>
+            <TH className="w-40 text-right">Ações</TH>
           </TR>
         </THead>
         <TBody>
@@ -106,12 +120,7 @@ export function HistoricoProprietarios({
             <TR key={p.id} className={cn(p.isProprietarioAtual && 'bg-primary-50/60')}>
               <TD>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={cn(
-                      'text-slate-900',
-                      p.isProprietarioAtual && 'font-semibold',
-                    )}
-                  >
+                  <span className={cn('text-slate-900', p.isProprietarioAtual && 'font-semibold')}>
                     {p.nomeCompleto}
                   </span>
                   {p.isProprietarioAtual ? (
@@ -125,6 +134,35 @@ export function HistoricoProprietarios({
                 {p.dataVenda ? formatarData(p.dataVenda) : '—'}
               </TD>
               <TD className="text-slate-700">{p.observacao?.trim() || '—'}</TD>
+              <TD className="text-right">
+                <div className="inline-flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditando(p)}
+                    className="rounded px-2 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  >
+                    Editar
+                  </button>
+                  <AcaoExcluirProprietario proprietario={p}>
+                    {({ abrir, desabilitado, motivo }) => (
+                      <button
+                        type="button"
+                        onClick={abrir}
+                        disabled={desabilitado}
+                        title={motivo}
+                        className={cn(
+                          'rounded px-2 py-1 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
+                          desabilitado
+                            ? 'cursor-not-allowed text-slate-400'
+                            : 'text-danger-700 hover:bg-danger-50',
+                        )}
+                      >
+                        Excluir
+                      </button>
+                    )}
+                  </AcaoExcluirProprietario>
+                </div>
+              </TD>
             </TR>
           ))}
         </TBody>
