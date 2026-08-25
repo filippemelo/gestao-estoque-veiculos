@@ -73,8 +73,7 @@ gestao-estoque-veiculos/
 > **Observação:** durante o desenvolvimento local foi utilizado o Oracle Database via Docker (imagem [`gvenzl/oracle-free`](https://github.com/gvenzl/oci-oracle-free)):
 >
 > ```bash
-> docker run -d --name oracle-free -p 1521:1521 \
->   -e ORACLE_PASSWORD=SUA_SENHA gvenzl/oracle-free:slim
+> docker run -d --name oracle-free -p 1521:1521 -e ORACLE_PASSWORD=SUA_SENHA gvenzl/oracle-free:slim
 > ```
 >
 > Após o container subir, conecte-se como `SYSTEM` no serviço `freepdb1` e crie o usuário/schema da aplicação:
