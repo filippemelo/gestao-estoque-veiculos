@@ -70,6 +70,21 @@ gestao-estoque-veiculos/
 
 ## Banco de Dados
 
+> **Observação:** durante o desenvolvimento local foi utilizado o Oracle Database via Docker (imagem [`gvenzl/oracle-free`](https://github.com/gvenzl/oci-oracle-free)):
+>
+> ```bash
+> docker run -d --name oracle-free -p 1521:1521 \
+>   -e ORACLE_PASSWORD=SUA_SENHA gvenzl/oracle-free:slim
+> ```
+>
+> Após o container subir, conecte-se como `SYSTEM` no serviço `freepdb1` e crie o usuário/schema da aplicação:
+>
+> ```sql
+> CREATE USER estoque IDENTIFIED BY SUA_SENHA;
+> GRANT CONNECT, RESOURCE TO estoque;
+> ALTER USER estoque QUOTA UNLIMITED ON USERS;
+> ```
+
 1. Crie um usuário/schema no Oracle (ex.: `estoque`) com permissão para criar tabelas.
 2. Execute o script [database/create_tables.sql](database/create_tables.sql) conectado a esse usuário. Ele cria as tabelas `VEICULO` e `PROPRIETARIO` (com FK e constraints).
 3. Crie o arquivo `backend/GestaoVeiculos.Api/appsettings.Development.json` (ele **não** vem versionado no repositório — está no `.gitignore` por conter credenciais) com a estrutura completa abaixo, ajustando os valores para o seu ambiente:
@@ -86,7 +101,7 @@ gestao-estoque-veiculos/
     "DefaultConnection": "User Id=estoque;Password=SUA_SENHA;Data Source=localhost:1521/freepdb1;"
   },
   "Cors": {
-    "AllowedOrigins": [ "http://localhost:5173" ]
+    "AllowedOrigins": ["http://localhost:5173"]
   }
 }
 ```
