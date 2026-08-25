@@ -72,15 +72,32 @@ gestao-estoque-veiculos/
 
 1. Crie um usuário/schema no Oracle (ex.: `estoque`) com permissão para criar tabelas.
 2. Execute o script [database/create_tables.sql](database/create_tables.sql) conectado a esse usuário. Ele cria as tabelas `VEICULO` e `PROPRIETARIO` (com FK e constraints).
-3. Configure a connection string em [backend/GestaoVeiculos.Api/appsettings.Development.json](backend/GestaoVeiculos.Api/appsettings.Development.json):
+3. Crie o arquivo `backend/GestaoVeiculos.Api/appsettings.Development.json` (ele **não** vem versionado no repositório — está no `.gitignore` por conter credenciais) com a estrutura completa abaixo, ajustando os valores para o seu ambiente:
 
 ```json
 {
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
   "ConnectionStrings": {
     "DefaultConnection": "User Id=estoque;Password=SUA_SENHA;Data Source=localhost:1521/freepdb1;"
+  },
+  "Cors": {
+    "AllowedOrigins": [ "http://localhost:5173" ]
   }
 }
 ```
+
+Parâmetros:
+
+- `ConnectionStrings:DefaultConnection` — string de conexão Oracle (usuário, senha e Data Source no formato `host:porta/serviço`).
+- `Cors:AllowedOrigins` — array de origens permitidas pelo CORS. Inclua a URL onde o frontend está servido (padrão do Vite: `http://localhost:5173`).
+- `Logging:LogLevel` — nível mínimo de log por categoria.
+
+> Sem esse arquivo (ou com a connection string incorreta) o backend sobe, mas as requisições do frontend falham com mensagens do tipo _"Não foi possível carregar os veículos. Falha de rede ao contatar a API."_.
 
 ## Como Rodar
 
@@ -101,9 +118,12 @@ dotnet run
 
 ```bash
 cd frontend/GestaoVeiculos.Web
-pnpm install   # ou: npm install
-pnpm dev       # ou: npm run dev
+cp .env.example .env.local   # no Windows (PowerShell): Copy-Item .env.example .env.local
+pnpm install                 # ou: npm install
+pnpm dev                     # ou: npm run dev
 ```
+
+Ajuste a variável `VITE_API_BASE_URL` no `.env.local` caso o backend não esteja em `http://localhost:5093`.
 
 - Dev server: <http://localhost:5173> (origem já liberada no CORS do backend)
 
@@ -111,12 +131,9 @@ Scripts adicionais do frontend: `build`, `preview`, `lint`, `lint:fix`, `format`
 
 ## Configuração
 
-Toda a configuração fica em [appsettings.Development.json](backend/GestaoVeiculos.Api/appsettings.Development.json):
+A configuração do backend em Development fica em `backend/GestaoVeiculos.Api/appsettings.Development.json` (veja a estrutura completa na seção [Banco de Dados](#banco-de-dados)).
 
-- `ConnectionStrings:DefaultConnection` — string de conexão Oracle.
-- `Cors:AllowedOrigins` — array de origens permitidas (por padrão, `http://localhost:5173`).
-
-Para outros ambientes, crie o `appsettings.{Ambiente}.json` correspondente ou defina via variáveis de ambiente.
+Para outros ambientes, crie o `appsettings.{Ambiente}.json` correspondente ou defina os mesmos valores via variáveis de ambiente (ex.: `ConnectionStrings__DefaultConnection`, `Cors__AllowedOrigins__0`).
 
 ## Endpoints Principais
 
