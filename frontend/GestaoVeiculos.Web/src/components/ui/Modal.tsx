@@ -48,7 +48,9 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
       onClick={onBackdropClick}
       aria-labelledby="modal-title"
       className={cn(
-        'w-full rounded-lg border border-border-subtle bg-white p-0 shadow-xl backdrop:bg-slate-900/40',
+        // `m-auto` restaura a centralização nativa do <dialog> que o
+        // Preflight do Tailwind v4 zera com `* { margin: 0 }`.
+        'w-full m-auto rounded-lg border border-border-subtle bg-white p-0 shadow-xl backdrop:bg-slate-900/40',
         sizes[size],
       )}
     >

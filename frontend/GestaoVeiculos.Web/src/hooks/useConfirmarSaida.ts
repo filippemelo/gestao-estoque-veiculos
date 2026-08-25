@@ -35,5 +35,12 @@ export function useConfirmarSaida(deveBloquear: boolean) {
     estaBloqueado: blocker.state === 'blocked',
     confirmarSaida: () => blocker.proceed?.(),
     cancelarSaida: () => blocker.reset?.(),
+    // Libera o bloqueio SÍNCRONAMENTE. Necessário quando o consumidor vai
+    // salvar e navegar no mesmo tick: sem isso, o navigate acontece antes
+    // do useEffect que sincroniza o ref, e o Modal "Descartar alterações?"
+    // aparece indevidamente.
+    liberar: () => {
+      bloquearRef.current = false
+    },
   }
 }

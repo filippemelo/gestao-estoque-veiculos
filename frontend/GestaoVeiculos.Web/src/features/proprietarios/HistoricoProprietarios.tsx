@@ -47,7 +47,7 @@ export function HistoricoProprietarios({
   return (
     <section
       aria-label="Histórico de proprietários"
-      className="space-y-3 rounded-md border border-border-subtle bg-white p-4"
+      className="space-y-3 rounded-lg border border-border-subtle bg-white p-4 shadow-sm ring-1 ring-slate-900/[0.03]"
     >
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div>
@@ -99,6 +99,7 @@ export function HistoricoProprietarios({
         <EmptyState
           title="Nenhum proprietário cadastrado"
           description="Adicione um proprietário para registrar o histórico deste veículo."
+          compact
         />
       )
     }

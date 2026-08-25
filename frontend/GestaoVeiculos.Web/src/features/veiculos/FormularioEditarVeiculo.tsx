@@ -111,7 +111,7 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
     setDirty(false)
   }
 
-  const { estaBloqueado, confirmarSaida, cancelarSaida } = useConfirmarSaida(dirty)
+  const { estaBloqueado, confirmarSaida, cancelarSaida, liberar } = useConfirmarSaida(dirty)
 
   // Refs para focar no primeiro erro.
   const refMarca = useRef<HTMLInputElement>(null)
@@ -261,7 +261,11 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
     mutation.mutate(resultado.data, {
       onSuccess: () => {
         toast.show({ variant: 'success', title: 'Alterações salvas' })
-        // Libera o blocker antes de sair da rota, senão o Modal aparece.
+        // Libera o blocker SÍNCRONAMENTE antes de sair da rota. `limparSujo`
+        // sozinho só atualiza o state local; o ref interno do useConfirmarSaida
+        // só sincronizaria no próximo commit, e o navigate acontece antes,
+        // fazendo o Modal "Descartar alterações?" aparecer indevidamente.
+        liberar()
         limparSujo()
         navigate(`/veiculos/${veiculoInicial.id}`)
       },

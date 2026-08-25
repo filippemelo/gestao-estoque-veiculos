@@ -14,7 +14,7 @@ export function DadosDoVeiculo({ veiculo }: Props) {
   return (
     <section
       aria-label="Dados do veículo"
-      className="rounded-md border border-border-subtle bg-white"
+      className="rounded-lg border border-border-subtle bg-white shadow-sm ring-1 ring-slate-900/[0.03]"
     >
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-4 py-3">
         <div className="min-w-0">
