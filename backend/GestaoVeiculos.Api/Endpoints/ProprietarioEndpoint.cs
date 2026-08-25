@@ -13,7 +13,7 @@ public static class ProprietarioEndpoint
         group.MapPost("", async (CriarProprietarioRequest request, IProprietarioService service) =>
         {
             var resposta = await service.CriarProprietarioAsync(request);
-            return Results.Created($"/proprietarios/{resposta.Dados.Id}", resposta);
+            return Results.Created($"/proprietarios/{resposta.Dados!.Id}", resposta);
         });
 
         group.MapGet("", async ([AsParameters] ListarProprietariosPageOption pageOption, IProprietarioService service) =>

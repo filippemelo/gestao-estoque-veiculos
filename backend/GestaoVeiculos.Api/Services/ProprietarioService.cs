@@ -49,7 +49,7 @@ public class ProprietarioService(
             null,
             request.Observacao);
 
-        return new ResultadoResponse<ProprietarioResponse>((ProprietarioResponse)criado);
+        return ResultadoResponse<ProprietarioResponse>.Ok((ProprietarioResponse)criado);
     }
 
     public async Task<ResultadoPaginadoResponse<ProprietarioResponse>> ListarProprietariosAsync(ListarProprietariosPageOption pageOption)
@@ -60,7 +60,7 @@ public class ProprietarioService(
 
         var respostas = itens.Select(p => (ProprietarioResponse)p).ToList();
 
-        return new ResultadoPaginadoResponse<ProprietarioResponse>(respostas, pageOption.Page, pageOption.PageSize, total);
+        return ResultadoPaginadoResponse<ProprietarioResponse>.Criar(respostas, pageOption.Page, pageOption.PageSize, total);
     }
 
     public async Task<ResultadoResponse<IEnumerable<ProprietarioResponse>>> ListarPorVeiculoAsync(int veiculoId)
@@ -73,7 +73,7 @@ public class ProprietarioService(
 
         var respostas = proprietarios.Select(p => (ProprietarioResponse)p).ToList();
 
-        return new ResultadoResponse<IEnumerable<ProprietarioResponse>>(respostas);
+        return ResultadoResponse<IEnumerable<ProprietarioResponse>>.Ok(respostas);
     }
 
     public async Task<ResultadoResponse<ProprietarioResponse>> AtualizarProprietarioAsync(int id, AtualizarProprietarioRequest request)
@@ -126,7 +126,7 @@ public class ProprietarioService(
             await _proprietarioRepository.AtualizarProprietarioAsync(atualizado);
         }
 
-        return new ResultadoResponse<ProprietarioResponse>((ProprietarioResponse)atualizado);
+        return ResultadoResponse<ProprietarioResponse>.Ok((ProprietarioResponse)atualizado);
     }
 
     public async Task ExcluirProprietarioAsync(int id)
@@ -150,7 +150,10 @@ public class ProprietarioService(
         if (Validator.TryValidateObject(request, contexto, resultados, validateAllProperties: true))
             return;
 
-        var mensagens = string.Join(" ", resultados.Select(r => r.ErrorMessage));
-        throw new ValidationException(mensagens);
+        var erros = resultados
+            .Select(r => new ErroCampo(r.MemberNames.FirstOrDefault(), r.ErrorMessage ?? string.Empty))
+            .ToArray();
+
+        throw new ValidationException("Existem dados inválidos.", erros);
     }
 }

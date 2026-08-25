@@ -13,7 +13,7 @@ public static class VeiculoEndpoint
         group.MapPost("", async (CriarVeiculoRequest request, IVeiculoService service) =>
         {
             var resposta = await service.CriarVeiculoAsync(request);
-            return Results.Created($"/veiculos/{resposta.Dados.Id}", resposta);
+            return Results.Created($"/veiculos/{resposta.Dados!.Id}", resposta);
         });
 
         group.MapGet("", async ([AsParameters] ListarVeiculosPageOption pageOption, IVeiculoService service) =>

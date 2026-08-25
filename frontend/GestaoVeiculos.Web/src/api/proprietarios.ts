@@ -9,11 +9,8 @@ import type {
   Proprietario,
 } from './types'
 
-function desembrulhar<T>(raw: EnvelopeDados<T> | T): T {
-  if (typeof raw === 'object' && raw !== null && 'dados' in raw) {
-    return (raw as EnvelopeDados<T>).dados
-  }
-  return raw as T
+function desembrulhar<T>(raw: EnvelopeDados<T>): T {
+  return raw.dados
 }
 
 // Ordenação por dataAquisicao é contrato de UI (histórico exibido crescente).
@@ -25,7 +22,7 @@ export async function listarProprietariosDoVeiculo(
   veiculoId: number,
   signal?: AbortSignal,
 ): Promise<Proprietario[]> {
-  const raw = await request<EnvelopeDados<Proprietario[]> | Proprietario[]>(
+  const raw = await request<EnvelopeDados<Proprietario[]>>(
     `/proprietarios/veiculo/${veiculoId}`,
     { signal },
   )
@@ -37,7 +34,7 @@ export async function criarProprietario(
   payload: CriarProprietarioRequest,
   signal?: AbortSignal,
 ): Promise<Proprietario> {
-  const raw = await request<EnvelopeDados<Proprietario> | Proprietario>('/proprietarios', {
+  const raw = await request<EnvelopeDados<Proprietario>>('/proprietarios', {
     method: 'POST',
     body: payload,
     signal,
@@ -50,7 +47,7 @@ export async function atualizarProprietario(
   payload: AtualizarProprietarioRequest,
   signal?: AbortSignal,
 ): Promise<Proprietario> {
-  const raw = await request<EnvelopeDados<Proprietario> | Proprietario>(
+  const raw = await request<EnvelopeDados<Proprietario>>(
     `/proprietarios/${id}`,
     { method: 'PUT', body: payload, signal },
   )

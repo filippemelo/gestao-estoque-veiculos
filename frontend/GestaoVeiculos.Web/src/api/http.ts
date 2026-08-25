@@ -1,28 +1,31 @@
-import type { ProblemDetails } from './types'
+import type { ErroDetalhe, ErroResponse } from './types'
 
 const DEFAULT_TIMEOUT_MS = 15_000
 
 export class ApiError extends Error {
   readonly status: number
-  readonly title: string | undefined
-  readonly detail: string | undefined
-  readonly problemDetails: ProblemDetails | undefined
+  readonly codigo: string | undefined
+  readonly erros: ErroDetalhe[] | undefined
+  readonly traceId: string | undefined
+  readonly erroResponse: ErroResponse | undefined
 
   constructor(
     message: string,
     status: number,
     parts: {
-      title?: string
-      detail?: string
-      problemDetails?: ProblemDetails
+      codigo?: string
+      erros?: ErroDetalhe[]
+      traceId?: string
+      erroResponse?: ErroResponse
     } = {},
   ) {
     super(message)
     this.name = 'ApiError'
     this.status = status
-    this.title = parts.title
-    this.detail = parts.detail
-    this.problemDetails = parts.problemDetails
+    this.codigo = parts.codigo
+    this.erros = parts.erros
+    this.traceId = parts.traceId
+    this.erroResponse = parts.erroResponse
   }
 }
 
@@ -83,15 +86,10 @@ function combineSignals(externalSignal: AbortSignal | undefined, timeoutMs: numb
   return { signal: controller.signal, cleanup }
 }
 
-function isProblemDetails(value: unknown): value is ProblemDetails {
+function isErroResponse(value: unknown): value is ErroResponse {
   if (typeof value !== 'object' || value === null) return false
   const v = value as Record<string, unknown>
-  return (
-    typeof v.title === 'string' ||
-    typeof v.detail === 'string' ||
-    typeof v.status === 'number' ||
-    typeof v.type === 'string'
-  )
+  return v.sucesso === false && typeof v.codigo === 'string' && typeof v.mensagem === 'string'
 }
 
 async function parseResponseBody(response: Response): Promise<unknown> {
@@ -113,33 +111,34 @@ async function parseResponseBody(response: Response): Promise<unknown> {
 
 function buildErrorMessage(status: number, body: unknown): {
   message: string
-  title?: string
-  detail?: string
-  problemDetails?: ProblemDetails
+  codigo?: string
+  erros?: ErroDetalhe[]
+  traceId?: string
+  erroResponse?: ErroResponse
 } {
-  if (isProblemDetails(body)) {
-    const pd = body
-    // Erros de validação vêm em `errors` — concatenamos para uma mensagem única.
+  if (isErroResponse(body)) {
+    const erros = body.erros ?? undefined
+    // Se há erros de campo, agrega numa mensagem única para exibição fallback.
     let extra = ''
-    if (pd.errors) {
-      const parts: string[] = []
-      for (const [field, msgs] of Object.entries(pd.errors)) {
-        parts.push(`${field}: ${msgs.join(', ')}`)
-      }
-      if (parts.length > 0) extra = ` (${parts.join('; ')})`
+    if (erros && erros.length > 0) {
+      const partes = erros.map((e) => (e.campo ? `${e.campo}: ${e.mensagem}` : e.mensagem))
+      extra = ` (${partes.join('; ')})`
     }
-    const message = pd.detail?.trim()
-      ? `${pd.detail}${extra}`
-      : (pd.title ?? mensagemGenerica(status)) + extra
-    return { message, title: pd.title, detail: pd.detail, problemDetails: pd }
+    return {
+      message: `${body.mensagem}${extra}`,
+      codigo: body.codigo,
+      erros,
+      traceId: body.traceId ?? undefined,
+      erroResponse: body,
+    }
   }
   if (typeof body === 'string' && body.trim() !== '') {
-    return { message: body, detail: body }
+    return { message: body }
   }
   return { message: mensagemGenerica(status) }
 }
 
-// Fallback em pt-BR quando o backend não fornece detail nem title.
+// Fallback em pt-BR quando o backend não fornece corpo estruturado.
 function mensagemGenerica(status: number): string {
   if (status >= 500) return 'O servidor encontrou um problema. Tente novamente em instantes.'
   if (status === 404) return 'O recurso solicitado não foi encontrado.'
@@ -189,7 +188,6 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     throw new ApiError(
       'Falha de rede ao contatar a API. Verifique sua conexão.',
       0,
-      { detail: err instanceof Error ? err.message : String(err) },
     )
   }
   cleanup()
@@ -197,11 +195,13 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   const parsedBody = await parseResponseBody(response)
 
   if (!response.ok) {
-    const { message, title, detail, problemDetails } = buildErrorMessage(
-      response.status,
-      parsedBody,
-    )
-    throw new ApiError(message, response.status, { title, detail, problemDetails })
+    const parts = buildErrorMessage(response.status, parsedBody)
+    throw new ApiError(parts.message, response.status, {
+      codigo: parts.codigo,
+      erros: parts.erros,
+      traceId: parts.traceId,
+      erroResponse: parts.erroResponse,
+    })
   }
 
   return parsedBody as T

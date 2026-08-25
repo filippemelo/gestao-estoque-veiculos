@@ -84,15 +84,28 @@ export type ListarVeiculosParams = {
   pageSize?: number
 }
 
-// Envelope do backend: item único vem em { dados: T } e listagem em
-// { dados: T[], pagina, tamanho, total, totalPaginas }.
-export type EnvelopeDados<T> = { dados: T }
-export type EnvelopePaginadoBackend<T> = {
-  dados: T[]
+// Envelope do backend: item único vem em { sucesso, dados: T, mensagem? }
+// e listagem em { sucesso, dados: T[], paginacao: {...}, mensagem? }.
+export type EnvelopeDados<T> = {
+  sucesso: boolean
+  dados: T
+  mensagem?: string | null
+}
+
+export type PaginacaoBackend = {
   pagina: number
-  tamanho: number
-  total: number
+  tamanhoPagina: number
+  totalRegistros: number
   totalPaginas: number
+  temPaginaAnterior: boolean
+  temProximaPagina: boolean
+}
+
+export type EnvelopePaginadoBackend<T> = {
+  sucesso: boolean
+  dados: T[]
+  paginacao: PaginacaoBackend
+  mensagem?: string | null
 }
 
 // Formato normalizado consumido pelos hooks/telas.
@@ -104,13 +117,16 @@ export type PaginaResultado<T> = {
   totalPages: number
 }
 
-// ProblemDetails produzido pelo GlobalExceptionHandler do backend.
-export type ProblemDetails = {
-  type?: string
-  title?: string
-  status?: number
-  detail?: string
-  instance?: string
-  traceId?: string
-  errors?: Record<string, string[]>
+// ErroResponse produzido pelo GlobalExceptionHandler do backend.
+export type ErroDetalhe = {
+  campo?: string | null
+  mensagem: string
+}
+
+export type ErroResponse = {
+  sucesso: false
+  codigo: string
+  mensagem: string
+  erros?: ErroDetalhe[] | null
+  traceId?: string | null
 }

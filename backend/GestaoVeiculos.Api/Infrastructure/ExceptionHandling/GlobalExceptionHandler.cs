@@ -1,7 +1,7 @@
 using GestaoVeiculos.Api.Domain.Exceptions;
+using GestaoVeiculos.Api.Models.Responses;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace GestaoVeiculos.Api.Infrastructure.ExceptionHandling;
 
@@ -19,7 +19,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
-        var (status, title) = Mapear(exception);
+        var (status, codigo, mensagem) = Mapear(exception, httpContext);
 
         if (exception is InfrastructureException infra)
         {
@@ -34,31 +34,34 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             _logger.LogWarning("Falha de domínio: {Mensagem}", exception.Message);
         }
 
-        var problema = new ProblemDetails
+        var erros = exception is ValidationException ve && ve.Erros.Count > 0
+            ? ve.Erros
+                .Select(e => new ErroDetalheResponse { Campo = e.Campo, Mensagem = e.Mensagem })
+                .ToArray()
+            : null;
+
+        var resposta = new ErroResponse
         {
-            Status = status,
-            Title = title,
-            Detail = status == StatusCodes.Status500InternalServerError
-                ? "Ocorreu um erro inesperado. Tente novamente mais tarde."
-                : exception.Message,
-            Type = $"https://httpstatuses.io/{status}",
-            Instance = httpContext.Request.Path
+            Codigo = codigo,
+            Mensagem = mensagem,
+            Erros = erros,
+            TraceId = httpContext.TraceIdentifier
         };
 
-        problema.Extensions["traceId"] = httpContext.TraceIdentifier;
-
         httpContext.Response.StatusCode = status;
-        await httpContext.Response.WriteAsJsonAsync(problema, cancellationToken);
+        await httpContext.Response.WriteAsJsonAsync(resposta, cancellationToken);
 
         return true;
     }
 
-    private static (int Status, string Title) Mapear(Exception exception) => exception switch
+    private static (int Status, string Codigo, string Mensagem) Mapear(
+        Exception exception,
+        HttpContext _) => exception switch
     {
-        NotFoundException => (StatusCodes.Status404NotFound, "Recurso não encontrado"),
-        ValidationException => (StatusCodes.Status400BadRequest, "Requisição inválida"),
-        ConflictException => (StatusCodes.Status409Conflict, "Conflito de estado"),
-        InfrastructureException => (StatusCodes.Status503ServiceUnavailable, "Serviço indisponível"),
-        _ => (StatusCodes.Status500InternalServerError, "Erro interno do servidor")
+        NotFoundException => (StatusCodes.Status404NotFound, "NAO_ENCONTRADO", exception.Message),
+        ValidationException => (StatusCodes.Status400BadRequest, "VALIDACAO", exception.Message),
+        ConflictException => (StatusCodes.Status409Conflict, "REGRA_NEGOCIO", exception.Message),
+        InfrastructureException => (StatusCodes.Status503ServiceUnavailable, "SERVICO_INDISPONIVEL", exception.Message),
+        _ => (StatusCodes.Status500InternalServerError, "ERRO_INTERNO", "Ocorreu um erro inesperado. Tente novamente mais tarde.")
     };
 }

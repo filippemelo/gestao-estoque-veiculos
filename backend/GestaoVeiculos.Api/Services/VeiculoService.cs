@@ -40,7 +40,7 @@ public class VeiculoService(
             veiculo.Placa,
             veiculo.Quilometragem);
 
-        return new ResultadoResponse<VeiculoResponse>((VeiculoResponse)criado);
+        return ResultadoResponse<VeiculoResponse>.Ok((VeiculoResponse)criado);
     }
 
     public async Task<ResultadoResponse<VeiculoDetalheResponse>> ObterVeiculoAsync(int id)
@@ -54,7 +54,7 @@ public class VeiculoService(
 
         var detalhe = VeiculoDetalheResponse.De(veiculo, proprietarios);
 
-        return new ResultadoResponse<VeiculoDetalheResponse>(detalhe);
+        return ResultadoResponse<VeiculoDetalheResponse>.Ok(detalhe);
     }
 
     public async Task<ResultadoPaginadoResponse<VeiculoResponse>> ListarVeiculosAsync(ListarVeiculosPageOption pageOption)
@@ -65,7 +65,7 @@ public class VeiculoService(
 
         var respostas = itens.Select(v => (VeiculoResponse)v).ToList();
 
-        return new ResultadoPaginadoResponse<VeiculoResponse>(respostas, pageOption.Page, pageOption.PageSize, total);
+        return ResultadoPaginadoResponse<VeiculoResponse>.Criar(respostas, pageOption.Page, pageOption.PageSize, total);
     }
 
     public async Task ExcluirVeiculoAsync(int id)
@@ -129,7 +129,7 @@ public class VeiculoService(
             await _veiculoRepository.AtualizarVeiculoAsync(atualizado);
         }
 
-        return new ResultadoResponse<VeiculoResponse>((VeiculoResponse)atualizado);
+        return ResultadoResponse<VeiculoResponse>.Ok((VeiculoResponse)atualizado);
     }
 
     private static void Validar(object request)
@@ -140,7 +140,10 @@ public class VeiculoService(
         if (Validator.TryValidateObject(request, contexto, resultados, validateAllProperties: true))
             return;
 
-        var mensagens = string.Join(" ", resultados.Select(r => r.ErrorMessage));
-        throw new ValidationException(mensagens);
+        var erros = resultados
+            .Select(r => new ErroCampo(r.MemberNames.FirstOrDefault(), r.ErrorMessage ?? string.Empty))
+            .ToArray();
+
+        throw new ValidationException("Existem dados inválidos.", erros);
     }
 }
