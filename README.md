@@ -62,8 +62,10 @@ gestao-estoque-veiculos/
 │           ├── schemas/     # Schemas Zod
 │           ├── hooks/       # Hooks compartilhados
 │           └── router.tsx
-└── database/
-    └── create_tables.sql    # Script de criação das tabelas
+├── database/
+│   └── create_tables.sql    # Script de criação das tabelas
+├── README.md
+└── respostas.md             # Respostas das questões técnicas dissertativas
 ```
 
 ## Banco de Dados
@@ -137,6 +139,10 @@ Base URL: `http://localhost:5093`
 - `DELETE /proprietarios/{id}` — remove proprietário
 
 Documentação interativa completa disponível no Swagger em ambiente Development.
+
+## Questões Técnicas
+
+As respostas às cinco questões técnicas dissertativas exigidas no desafio estão em [respostas.md](respostas.md), cobrindo gerenciamento de conexões, prevenção de SQL Injection, relacionamento entre tabelas, transações e organização do projeto.
 
 ## Decisões Técnicas
 
