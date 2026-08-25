@@ -24,18 +24,26 @@ export function VeiculosListaPage() {
   const items = dados?.items ?? []
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Veículos</h1>
-          <p className="text-sm text-slate-600">
-            {dados
-              ? `${dados.total} veículo${dados.total === 1 ? '' : 's'} cadastrado${dados.total === 1 ? '' : 's'}`
-              : 'Carregando…'}
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Veículos</h1>
+          <p className="mt-0.5 text-sm text-slate-500">
+            {dados ? (
+              <>
+                <strong className="num font-semibold text-slate-800">{dados.total}</strong>{' '}
+                {dados.total === 1 ? 'veículo cadastrado' : 'veículos cadastrados'}
+              </>
+            ) : (
+              'Carregando…'
+            )}
           </p>
         </div>
         <Link to="/veiculos/novo">
-          <Button>Adicionar veículo</Button>
+          <Button>
+            <IconePlus />
+            Adicionar veículo
+          </Button>
         </Link>
       </header>
 
@@ -130,4 +138,17 @@ export function VeiculosListaPage() {
       </div>
     )
   }
+}
+
+function IconePlus() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+    </svg>
+  )
 }

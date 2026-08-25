@@ -2,12 +2,7 @@ import type { ReactNode } from 'react'
 
 import type { Veiculo } from '@/api/types'
 import { BadgeSituacao } from '@/components/ui'
-import {
-  formatarInteiro,
-  formatarMoedaBRL,
-  formatarPlaca,
-  formatarQuilometragem,
-} from '@/lib/format'
+import { formatarMoedaBRL, formatarPlaca, formatarQuilometragem } from '@/lib/format'
 
 type Props = {
   veiculo: Veiculo
@@ -33,7 +28,7 @@ export function DadosDoVeiculo({ veiculo }: Props) {
         <Item label="Marca">{veiculo.marca}</Item>
         <Item label="Modelo">{veiculo.modelo}</Item>
         <Item label="Ano">
-          <span className="num">{formatarInteiro(veiculo.ano)}</span>
+          <span className="num">{veiculo.ano}</span>
         </Item>
         <Item label="Cor">{veiculo.cor}</Item>
         <Item label="Tipo">{veiculo.tipo}</Item>

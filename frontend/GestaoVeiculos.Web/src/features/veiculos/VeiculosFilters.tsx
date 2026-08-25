@@ -41,7 +41,7 @@ export function VeiculosFilters({ filtros, onFiltrosChange, onLimpar, temFiltro 
   return (
     <section
       aria-label="Filtros"
-      className="grid gap-3 rounded-md border border-border-subtle bg-white p-3 md:grid-cols-[1fr_1fr_auto]"
+      className="grid gap-4 rounded-lg border border-border-subtle bg-white p-4 shadow-sm ring-1 ring-slate-900/[0.03] md:grid-cols-[1fr_1fr_auto]"
     >
       <Field label="Marca" hint="Filtro parcial. Aplica ao parar de digitar.">
         {(p) => (

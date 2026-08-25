@@ -136,12 +136,12 @@ export function FormularioNovoVeiculo() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
-      <div className="rounded-md border border-primary-100 bg-primary-50 p-3 text-sm text-primary-900">
+      <div className="rounded-lg border border-primary-100 bg-primary-50 p-3 text-sm text-primary-900">
         Ao salvar, o veículo será cadastrado com a situação{' '}
         <BadgeSituacao situacao="Disponível" className="ml-1" />.
       </div>
 
-      <div className="grid gap-4 rounded-md border border-border-subtle bg-white p-4 md:grid-cols-2">
+      <div className="grid gap-4 rounded-lg border border-border-subtle bg-white p-4 shadow-sm ring-1 ring-slate-900/[0.03] md:grid-cols-2">
         <Field label="Placa" required error={erros.placa} hint="ABC-1234 ou ABC1D23 (Mercosul)">
           {(p) => (
             <Input
@@ -182,17 +182,35 @@ export function FormularioNovoVeiculo() {
         />
       </div>
 
-      <div className="flex justify-end gap-2">
+      <div className="mt-4 flex justify-end gap-2 border-t border-border-subtle pt-4">
         <Link to="/veiculos">
           <Button variant="secondary" disabled={enviando} type="button">
             Cancelar
           </Button>
         </Link>
         <Button type="submit" loading={enviando}>
+          <IconeSalvar />
           Salvar veículo
         </Button>
       </div>
     </form>
+  )
+}
+
+function IconeSalvar() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path
+        fillRule="evenodd"
+        d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z"
+        clipRule="evenodd"
+      />
+    </svg>
   )
 }
 

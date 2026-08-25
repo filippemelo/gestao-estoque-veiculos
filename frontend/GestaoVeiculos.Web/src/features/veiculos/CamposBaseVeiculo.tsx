@@ -122,6 +122,8 @@ export function CamposBaseVeiculo({
   }
 
   function renderNumericoInteiro(campo: 'ano' | 'quilometragem', label: string) {
+    const placeholderPadrao =
+      campo === 'ano' ? String(new Date().getFullYear()) : '0'
     return (
       <Field label={label} required error={erros[campo]}>
         {(p) => (
@@ -131,6 +133,7 @@ export function CamposBaseVeiculo({
             type="number"
             inputMode="numeric"
             numeric
+            placeholder={placeholderPadrao}
             value={values[campo] === '' ? '' : String(values[campo])}
             onChange={(e) => {
               const v = e.target.value

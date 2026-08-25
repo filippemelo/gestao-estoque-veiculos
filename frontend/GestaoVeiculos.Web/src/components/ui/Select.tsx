@@ -13,7 +13,7 @@ export function Select({ invalid, className, children, ref, ...rest }: SelectPro
       ref={ref}
       aria-invalid={invalid || undefined}
       className={cn(
-        'block w-full rounded-md border bg-white px-3 text-sm text-slate-900 h-10',
+        'block h-10 w-full cursor-pointer rounded-md border bg-white px-3 text-sm text-slate-900',
         'motion-safe:transition motion-safe:duration-150',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-primary-500',
         'disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed',

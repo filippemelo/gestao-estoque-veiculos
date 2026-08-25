@@ -2,12 +2,7 @@ import { Link } from 'react-router-dom'
 
 import type { Veiculo } from '@/api/types'
 import { BadgeSituacao, Skeleton } from '@/components/ui'
-import {
-  formatarInteiro,
-  formatarMoedaBRL,
-  formatarPlaca,
-  formatarQuilometragem,
-} from '@/lib/format'
+import { formatarMoedaBRL, formatarPlaca, formatarQuilometragem } from '@/lib/format'
 
 type Props = {
   veiculos: Veiculo[]
@@ -38,7 +33,7 @@ export function VeiculosCards({ veiculos, carregando }: Props) {
               <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-slate-700">
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Ano</dt>
-                  <dd className="num">{formatarInteiro(v.ano)}</dd>
+                  <dd className="num">{v.ano}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Cor</dt>
@@ -60,16 +55,16 @@ export function VeiculosCards({ veiculos, carregando }: Props) {
                 </div>
               </dl>
 
-              <div className="mt-3 flex justify-end gap-3 border-t border-border-subtle pt-2">
+              <div className="mt-3 flex justify-end gap-1 border-t border-border-subtle pt-2">
                 <Link
                   to={`/veiculos/${v.id}`}
-                  className="text-xs font-medium text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  className="cursor-pointer rounded px-2 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 >
                   Ver
                 </Link>
                 <Link
                   to={`/veiculos/${v.id}/editar`}
-                  className="text-xs font-medium text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  className="cursor-pointer rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 >
                   Editar
                 </Link>

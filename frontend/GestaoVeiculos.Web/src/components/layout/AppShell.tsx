@@ -25,7 +25,7 @@ export function AppShell() {
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    'rounded px-3 py-1.5 text-sm font-medium',
+                    'cursor-pointer rounded px-3 py-1.5 text-sm font-medium',
                     'motion-safe:transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
                     isActive

@@ -7,8 +7,12 @@
 
 import { z } from 'zod'
 
-export const situacaoSchema = z.enum(['Disponível', 'Reservado', 'Vendido'])
-export const tipoSchema = z.enum(['Hatch', 'Sedan', 'SUV', 'Picape'])
+export const situacaoSchema = z.enum(['Disponível', 'Reservado', 'Vendido'], {
+  error: 'Selecione a situação.',
+})
+export const tipoSchema = z.enum(['Hatch', 'Sedan', 'SUV', 'Picape'], {
+  error: 'Selecione o tipo.',
+})
 
 export const SITUACOES = situacaoSchema.options
 export const TIPOS = tipoSchema.options

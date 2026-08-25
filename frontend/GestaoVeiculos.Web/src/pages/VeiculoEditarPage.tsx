@@ -21,7 +21,7 @@ export function VeiculoEditarPage() {
       return <NaoEncontrado descricao={err.message} navigate={navigate} />
     }
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <CabecalhoErro />
         <ErrorState
           title="Não foi possível carregar o veículo."
@@ -34,9 +34,9 @@ export function VeiculoEditarPage() {
 
   if (query.isPending) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <CabecalhoCarregando />
-        <div className="rounded-md border border-border-subtle bg-white p-4">
+        <div className="rounded-lg border border-border-subtle bg-white p-4 shadow-sm ring-1 ring-slate-900/[0.03]">
           <div className="grid gap-4 md:grid-cols-2">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="space-y-1">
@@ -52,13 +52,13 @@ export function VeiculoEditarPage() {
 
   const veiculo = query.data
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
             Editar veículo
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="mt-0.5 text-sm text-slate-500">
             <Link to="/veiculos" className="text-primary-700 hover:underline">
               Veículos
             </Link>{' '}
@@ -69,6 +69,12 @@ export function VeiculoEditarPage() {
             · <span>{veiculo.marca} {veiculo.modelo}</span>
           </p>
         </div>
+        <Link to={`/veiculos/${veiculo.id}`}>
+          <Button variant="ghost">
+            <IconeVoltar />
+            Voltar
+          </Button>
+        </Link>
       </header>
 
       <FormularioEditarVeiculo veiculoInicial={veiculo} />
@@ -80,7 +86,7 @@ function CabecalhoCarregando() {
   return (
     <header className="flex items-center justify-between gap-3">
       <div className="space-y-2">
-        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-6 w-48" />
         <Skeleton className="h-3 w-56" />
       </div>
     </header>
@@ -90,9 +96,12 @@ function CabecalhoCarregando() {
 function CabecalhoErro() {
   return (
     <header className="flex items-center justify-between gap-3">
-      <h1 className="text-xl font-semibold text-slate-900">Editar veículo</h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Editar veículo</h1>
       <Link to="/veiculos">
-        <Button variant="ghost">Voltar</Button>
+        <Button variant="ghost">
+          <IconeVoltar />
+          Voltar
+        </Button>
       </Link>
     </header>
   )
@@ -106,14 +115,31 @@ function NaoEncontrado({
   navigate: ReturnType<typeof useNavigate>
 }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <CabecalhoErro />
-      <div className="flex flex-col items-start gap-3 rounded-md border border-border-subtle bg-white p-6">
+      <div className="flex flex-col items-start gap-3 rounded-lg border border-border-subtle bg-white p-6 shadow-sm ring-1 ring-slate-900/[0.03]">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Erro 404</p>
         <h2 className="text-lg font-semibold text-slate-900">Veículo não encontrado</h2>
         <p className="text-sm text-slate-600">{descricao}</p>
         <Button onClick={() => navigate('/veiculos')}>Ir para veículos</Button>
       </div>
     </div>
+  )
+}
+
+function IconeVoltar() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path
+        fillRule="evenodd"
+        d="M12.7 4.3a1 1 0 010 1.4L8.4 10l4.3 4.3a1 1 0 11-1.4 1.4l-5-5a1 1 0 010-1.4l5-5a1 1 0 011.4 0z"
+        clipRule="evenodd"
+      />
+    </svg>
   )
 }

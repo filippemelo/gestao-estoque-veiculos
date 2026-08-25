@@ -280,7 +280,7 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
   return (
     <>
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
-        <div className="grid gap-4 rounded-md border border-border-subtle bg-white p-4 md:grid-cols-2">
+        <div className="grid gap-4 rounded-lg border border-border-subtle bg-white p-4 shadow-sm ring-1 ring-slate-900/[0.03] md:grid-cols-2">
           <Field label="Placa" hint="A placa não pode ser alterada após o cadastro.">
             {(p) => (
               <Input
@@ -334,7 +334,7 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
         {values.situacao === 'Vendido' ? (
           <section
             aria-label="Dados do novo proprietário"
-            className="space-y-3 rounded-md border border-primary-200 bg-primary-50/40 p-4"
+            className="space-y-3 rounded-lg border border-primary-200 bg-primary-50/40 p-4"
           >
             <header className="text-sm text-primary-900">
               Como a situação foi marcada como{' '}
@@ -364,13 +364,14 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
           </section>
         ) : null}
 
-        <div className="flex justify-end gap-2">
+        <div className="mt-4 flex justify-end gap-2 border-t border-border-subtle pt-4">
           <Link to={`/veiculos/${veiculoInicial.id}`}>
             <Button variant="secondary" type="button" disabled={enviando}>
               Cancelar
             </Button>
           </Link>
           <Button type="submit" loading={enviando}>
+            <IconeSalvar />
             Salvar alterações
           </Button>
         </div>
@@ -423,4 +424,21 @@ function errosCamposProprietario(erros: Erros): CamposProprietarioErros {
     cpf: erros['novoProprietario.cpf'],
     observacao: erros['novoProprietario.observacao'],
   }
+}
+
+function IconeSalvar() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path
+        fillRule="evenodd"
+        d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z"
+        clipRule="evenodd"
+      />
+    </svg>
+  )
 }

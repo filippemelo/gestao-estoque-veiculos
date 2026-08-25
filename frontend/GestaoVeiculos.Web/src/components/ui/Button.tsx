@@ -53,7 +53,7 @@ export function Button({
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-md font-medium',
+        'inline-flex cursor-pointer items-center justify-center gap-2 rounded-md font-medium',
         'motion-safe:transition-colors motion-safe:duration-150',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
         'disabled:cursor-not-allowed',

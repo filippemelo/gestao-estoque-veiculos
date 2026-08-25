@@ -2,12 +2,7 @@ import { Link } from 'react-router-dom'
 
 import type { Veiculo } from '@/api/types'
 import { BadgeSituacao, Skeleton, Table, TBody, TD, TH, THead, TR } from '@/components/ui'
-import {
-  formatarInteiro,
-  formatarMoedaBRL,
-  formatarPlaca,
-  formatarQuilometragem,
-} from '@/lib/format'
+import { formatarMoedaBRL, formatarPlaca, formatarQuilometragem } from '@/lib/format'
 
 type Props = {
   veiculos: Veiculo[]
@@ -41,7 +36,7 @@ export function VeiculosTable({ veiculos, carregando }: Props) {
                   <TD className="num font-medium text-slate-900">{formatarPlaca(v.placa)}</TD>
                   <TD>{v.marca}</TD>
                   <TD className="text-slate-700">{v.modelo}</TD>
-                  <TD numeric>{formatarInteiro(v.ano)}</TD>
+                  <TD numeric>{v.ano}</TD>
                   <TD>{v.cor}</TD>
                   <TD>{v.tipo}</TD>
                   <TD numeric>{formatarMoedaBRL(v.preco)}</TD>
@@ -50,16 +45,16 @@ export function VeiculosTable({ veiculos, carregando }: Props) {
                     <BadgeSituacao situacao={v.situacao} />
                   </TD>
                   <TD className="text-right">
-                    <div className="inline-flex gap-2">
+                    <div className="inline-flex gap-1">
                       <Link
                         to={`/veiculos/${v.id}`}
-                        className="rounded px-2 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                        className="cursor-pointer rounded px-2 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                       >
                         Ver
                       </Link>
                       <Link
                         to={`/veiculos/${v.id}/editar`}
-                        className="rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                        className="cursor-pointer rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                       >
                         Editar
                       </Link>

@@ -52,15 +52,18 @@ export function Field({
         {required ? <span className="ml-0.5 text-danger-600">*</span> : null}
       </label>
       {typeof children === 'function' ? children(childProps) : children}
-      {error ? (
-        <p id={errorId} className="text-xs text-danger-700">
-          {error}
-        </p>
-      ) : hint ? (
-        <p id={hintId} className="text-xs text-slate-500">
-          {hint}
-        </p>
-      ) : null}
+      {/* Slot de hint/erro com altura reservada — garante alinhamento vertical
+          consistente entre Fields lado a lado no mesmo grid, mesmo quando só
+          um deles tem hint ou erro. */}
+      <p
+        id={error ? errorId : hint ? hintId : undefined}
+        className={cn(
+          'text-xs',
+          error ? 'text-danger-700' : 'text-slate-500',
+        )}
+      >
+        {error ?? hint ?? ' '}
+      </p>
     </div>
   )
 }

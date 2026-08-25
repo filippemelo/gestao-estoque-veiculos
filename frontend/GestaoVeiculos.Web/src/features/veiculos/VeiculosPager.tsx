@@ -35,7 +35,7 @@ export function VeiculosPager({ page, totalPages, total, pageSize, onPageChange 
         >
           Anterior
         </Button>
-        <span className="num text-xs text-slate-500">
+        <span className="num rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
           Página {page} de {totalPages}
         </span>
         <Button

@@ -4,7 +4,7 @@ import { cn } from '@/lib/cn'
 
 export function Table({ className, ...rest }: HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="overflow-x-auto rounded-md border border-border-subtle bg-white">
+    <div className="overflow-x-auto rounded-lg border border-border-subtle bg-white shadow-sm ring-1 ring-slate-900/[0.03]">
       <table
         className={cn('w-full border-collapse text-sm text-slate-800', className)}
         {...rest}
@@ -17,7 +17,7 @@ export function THead({ className, ...rest }: HTMLAttributes<HTMLTableSectionEle
   return (
     <thead
       className={cn(
-        'bg-slate-50 text-xs uppercase tracking-wide text-slate-600',
+        'border-b border-border-strong bg-slate-50 text-xs uppercase tracking-wide text-slate-600',
         className,
       )}
       {...rest}
@@ -32,7 +32,11 @@ export function TBody({ className, ...rest }: HTMLAttributes<HTMLTableSectionEle
 export function TR({ className, ...rest }: HTMLAttributes<HTMLTableRowElement>) {
   return (
     <tr
-      className={cn('motion-safe:transition-colors hover:bg-slate-50', className)}
+      className={cn(
+        // Zebra visível por padrão + hover no acento primary (identidade teal).
+        'even:bg-slate-50 motion-safe:transition-colors hover:bg-primary-50',
+        className,
+      )}
       {...rest}
     />
   )
@@ -47,8 +51,9 @@ export function TH({ className, numeric, ...rest }: CellProps) {
     <th
       scope="col"
       className={cn(
-        'px-3 py-2 text-left font-medium',
-        numeric ? 'text-right num' : '',
+        'px-4 py-3 font-medium',
+        // Mutuamente exclusivo — evita dependência da ordem no CSS de saída.
+        numeric ? 'text-right num' : 'text-left',
         className,
       )}
       {...rest}
@@ -63,7 +68,7 @@ export function TD({
 }: TdHTMLAttributes<HTMLTableCellElement> & { numeric?: boolean }) {
   return (
     <td
-      className={cn('px-3 py-2 align-middle', numeric ? 'text-right num' : '', className)}
+      className={cn('px-4 py-3 align-middle', numeric ? 'text-right num' : '', className)}
       {...rest}
     />
   )
