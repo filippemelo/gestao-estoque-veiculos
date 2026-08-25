@@ -3,11 +3,6 @@ import { useState } from 'react'
 
 import { Input } from './Input'
 
-// Input especializado para valores em BRL. Externamente aceita `number | ''`
-// para permitir estado "vazio" no formulário; internamente mantém o texto
-// formatado (89.990,00). A entrada é numérica pura: cada tecla é interpretada
-// como um dígito acumulado em centavos.
-
 type Props = {
   value: number | ''
   onChange: (v: number | '') => void
@@ -33,8 +28,8 @@ function formatar(valor: number | ''): string {
 export function InputMoedaBRL({ value, onChange, ...rest }: Props) {
   const [texto, setTexto] = useState(() => formatar(value))
 
-  // Se o value mudar por fora (reset do formulário, por ex.), reflete no
-  // texto exibido — padrão setState-durante-render com guard.
+  // Reflete mudanças externas de `value` (reset do form) sem useEffect —
+  // padrão setState-durante-render com guard.
   const [ultimoValue, setUltimoValue] = useState(value)
   if (value !== ultimoValue) {
     setUltimoValue(value)
@@ -54,7 +49,7 @@ export function InputMoedaBRL({ value, onChange, ...rest }: Props) {
           onChange('')
           return
         }
-        // Trata como centavos para evitar floats maldosos.
+        // Acumula em centavos para evitar erros de ponto flutuante.
         const centavos = Number(digitos.slice(0, 12))
         const valor = centavos / 100
         setTexto(formatar(valor))

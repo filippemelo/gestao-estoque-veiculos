@@ -8,8 +8,7 @@ import { useExcluirProprietarioMutation } from './hooks/useProprietarioMutations
 
 type Props = {
   proprietario: Proprietario
-  // Renderiza o próprio botão externo, e este componente cuida do dialog.
-  // Assim quem chama controla estilo/tamanho/posição do trigger.
+  // Render prop para deixar o consumidor controlar a aparência do trigger.
   children: (opts: { abrir: () => void; desabilitado: boolean; motivo?: string }) => React.ReactNode
 }
 

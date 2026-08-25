@@ -10,8 +10,7 @@ type FieldProps = {
   hint?: ReactNode
   error?: ReactNode
   className?: string
-  // O children pode ser um input já pronto (recebendo id/aria-*) ou uma
-  // função que recebe os atributos e retorna o input.
+  // children pode ser um input já pronto ou uma função que recebe id/aria-*.
   children: ReactNode | ((props: FieldChildrenProps) => ReactNode)
 }
 
@@ -52,9 +51,8 @@ export function Field({
         {required ? <span className="ml-0.5 text-danger-600">*</span> : null}
       </label>
       {typeof children === 'function' ? children(childProps) : children}
-      {/* Slot de hint/erro com altura reservada — garante alinhamento vertical
-          consistente entre Fields lado a lado no mesmo grid, mesmo quando só
-          um deles tem hint ou erro. */}
+      {/* Slot com altura reservada — Fields lado a lado ficam alinhados
+          verticalmente mesmo quando só um tem hint ou erro. */}
       <p
         id={error ? errorId : hint ? hintId : undefined}
         className={cn(

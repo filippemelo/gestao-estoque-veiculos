@@ -9,7 +9,6 @@ type Props = {
   carregando: boolean
 }
 
-// Alternativa mobile da VeiculosTable. Layout mais denso em card, sem colunas.
 export function VeiculosCards({ veiculos, carregando }: Props) {
   return (
     <ul className="grid gap-2 md:hidden">

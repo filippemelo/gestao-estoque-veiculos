@@ -8,8 +8,6 @@ type Props = {
   onPageChange: (page: number) => void
 }
 
-// Paginação numérica (Anterior / N de M / Próxima). Backend devolve `total`
-// e `totalPaginas`, então não precisamos do fallback "próxima/anterior cega".
 export function VeiculosPager({ page, totalPages, total, pageSize, onPageChange }: Props) {
   if (total === 0) return null
 

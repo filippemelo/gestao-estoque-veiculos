@@ -1,21 +1,12 @@
-// Schemas de validação para o domínio Veículo.
-// Espelham as regras do backend (ValidationAttributes em .NET) e adicionam
-// as regras client-only: ano ≤ ano atual, refinamento condicional na venda.
-//
-// Convenção: mensagens em pt-BR, voz ativa e específicas.
-
 import { z } from 'zod'
 
 import { situacaoSchema, tipoSchema } from './enums'
 
-// Formato antigo (ABC1234 / ABC-1234) ou Mercosul (ABC1D23).
-// Mesmo regex do backend: 3 letras + hífen opcional + 1 dígito + [letra ou dígito] + 2 dígitos.
+// Placa: mesmo regex do backend — antigo (ABC1234/ABC-1234) ou Mercosul (ABC1D23).
 const PLACA_REGEX = /^[A-Z]{3}-?\d[A-Z0-9]\d{2}$/
 
 const anoAtual = () => new Date().getFullYear()
 
-// -------------------- Campos base --------------------
-// Reutilizados por criar/atualizar; centralizamos aqui para não duplicar mensagens.
 const marcaField = z
   .string()
   .trim()
@@ -59,7 +50,6 @@ const placaField = z
   .max(10, 'Placa deve ter no máximo 10 caracteres.')
   .regex(PLACA_REGEX, 'Placa deve estar no formato ABC-1234 ou ABC1D23 (Mercosul).')
 
-// -------------------- Novo proprietário (embutido em venda) --------------------
 const CPF_REGEX = /^(\d{11}|\d{3}\.\d{3}\.\d{3}-\d{2})$/
 
 export const novoProprietarioSchema = z.object({
@@ -81,8 +71,7 @@ export const novoProprietarioSchema = z.object({
     .nullable(),
 })
 
-// -------------------- Criar --------------------
-// POST /veiculos não recebe `situacao` (backend força "Disponível").
+// POST /veiculos não recebe `situacao` — o backend força "Disponível".
 export const criarVeiculoSchema = z.object({
   marca: marcaField,
   modelo: modeloField,
@@ -94,10 +83,8 @@ export const criarVeiculoSchema = z.object({
   quilometragem: quilometragemField,
 })
 
-// -------------------- Atualizar --------------------
-// PUT /veiculos/{id} não recebe `placa` (imutável).
-// Se `situacao === "Vendido"`, `novoProprietario` passa a ser obrigatório e
-// seus campos internos são validados.
+// PUT /veiculos/{id} não recebe `placa` (imutável). Se `situacao === "Vendido"`,
+// `novoProprietario` passa a ser obrigatório e seus campos internos são validados.
 export const atualizarVeiculoSchema = z
   .object({
     marca: marcaField,
@@ -121,7 +108,6 @@ export const atualizarVeiculoSchema = z
     }
   })
 
-// -------------------- Tipos inferidos (payload exato enviado ao backend) --------------------
 export type CriarVeiculoInput = z.infer<typeof criarVeiculoSchema>
 export type AtualizarVeiculoInput = z.infer<typeof atualizarVeiculoSchema>
 export type NovoProprietarioInput = z.infer<typeof novoProprietarioSchema>

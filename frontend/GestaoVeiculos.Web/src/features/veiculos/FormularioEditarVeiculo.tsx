@@ -29,7 +29,6 @@ import type {
 import { CamposBaseVeiculo } from './CamposBaseVeiculo'
 import { useAtualizarVeiculoMutation } from './hooks/useAtualizarVeiculoMutation'
 
-// -------------------- Modelo de formulário --------------------
 type NovoProprietarioForm = {
   nomeCompleto: string
   cpf: string
@@ -43,7 +42,7 @@ type FormValues = CamposBaseVeiculoValues & {
 
 type Campo = keyof CamposBaseVeiculoValues | 'situacao'
 
-// Ordem física do formulário — usada para focar o primeiro erro no submit.
+// Ordem física do formulário — foca o primeiro erro no submit.
 const ORDEM_CAMPOS: readonly string[] = [
   'marca',
   'modelo',
@@ -69,7 +68,6 @@ function novoProprietarioVazio(): NovoProprietarioForm {
   return { nomeCompleto: '', cpf: '', observacao: '' }
 }
 
-// -------------------- Componente --------------------
 export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Veiculo }) {
   const navigate = useNavigate()
   const toast = useToast()
@@ -90,14 +88,13 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
       : '',
     situacao: situacaoInicial,
     quilometragem: veiculoInicial.quilometragem,
-    // Se o veículo já veio como "Vendido", preciso revelar a seção mesmo
-    // assim — backend exige novoProprietario em toda gravação com Vendido.
+    // Backend exige novoProprietario em toda gravação com Vendido — revelamos
+    // a seção mesmo quando o veículo já vem como "Vendido".
     novoProprietario: situacaoInicial === 'Vendido' ? novoProprietarioVazio() : null,
   }))
   const [erros, setErros] = useState<Erros>({})
 
-  // "Sujo" com ref (útil pro useBlocker enxergar o valor mais atual antes
-  // do navigate) + state (pra UI refletir).
+  // Flag "sujo" duplicada: ref (leitura síncrona pelo useBlocker) + state (UI).
   const [dirty, setDirty] = useState(false)
   const dirtyRef = useRef(false)
   function marcarSujo() {
@@ -113,7 +110,6 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
 
   const { estaBloqueado, confirmarSaida, cancelarSaida, liberar } = useConfirmarSaida(dirty)
 
-  // Refs para focar no primeiro erro.
   const refMarca = useRef<HTMLInputElement>(null)
   const refModelo = useRef<HTMLInputElement>(null)
   const refAno = useRef<HTMLInputElement>(null)
@@ -135,14 +131,13 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
     preco: refPreco,
     quilometragem: refKm,
     situacao: refSituacao,
-    // Erro no bloco inteiro aponta para o primeiro campo da seção.
+    // Erro no bloco inteiro foca o primeiro campo da seção.
     novoProprietario: refNovoPropNome,
     'novoProprietario.nomeCompleto': refNovoPropNome,
     'novoProprietario.cpf': refNovoPropCpf,
     'novoProprietario.observacao': refNovoPropObs,
   }
 
-  // -------------------- Setters --------------------
   function setCampo<K extends Campo>(campo: K, valor: FormValues[K]) {
     setValues((v) => ({ ...v, [campo]: valor }))
     marcarSujo()
@@ -185,7 +180,6 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
     setErros((e) => (e[chaveErro] ? { ...e, [chaveErro]: undefined } : e))
   }
 
-  // -------------------- Validação --------------------
   function focarPrimeiroErro(errosNovos: Erros) {
     for (const chave of ORDEM_CAMPOS) {
       if (errosNovos[chave]) {
@@ -196,7 +190,7 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
   }
 
   function validarCampoRaiz(campo: Campo) {
-    // Passamos o objeto inteiro para o schema aplicar cross-refinements.
+    // Objeto inteiro para o schema aplicar os cross-refinements.
     const parcial = atualizarVeiculoSchema.safeParse(paraPayload(values))
     if (parcial.success) {
       setErros((e) => (e[campo] ? { ...e, [campo]: undefined } : e))
@@ -207,9 +201,8 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
   }
 
   function paraPayload(v: FormValues) {
-    // O schema (e o backend) só aceitam novoProprietario quando situacao === 'Vendido'.
-    // Fora disso, garantimos que ele não vá no payload (evita "sujeira" do usuário
-    // que digitou algo, mudou a situação e voltou).
+    // Schema/backend só aceitam novoProprietario com situacao === 'Vendido'.
+    // Fora disso não pode escapar mesmo se o usuário tiver digitado algo antes.
     if (v.situacao !== 'Vendido') {
       return {
         marca: v.marca,
@@ -261,10 +254,8 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
     mutation.mutate(resultado.data, {
       onSuccess: () => {
         toast.show({ variant: 'success', title: 'Alterações salvas' })
-        // Libera o blocker SÍNCRONAMENTE antes de sair da rota. `limparSujo`
-        // sozinho só atualiza o state local; o ref interno do useConfirmarSaida
-        // só sincronizaria no próximo commit, e o navigate acontece antes,
-        // fazendo o Modal "Descartar alterações?" aparecer indevidamente.
+        // Libera SÍNCRONAMENTE antes do navigate — sem isso o Modal "Descartar
+        // alterações?" abre no meio da transição.
         liberar()
         limparSujo()
         navigate(`/veiculos/${veiculoInicial.id}`)
@@ -395,7 +386,6 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
   )
 }
 
-// -------------------- Adaptadores --------------------
 // Slice do objeto de erros para o CamposBaseVeiculo (só campos comuns).
 function errosBase(e: Erros): CamposBaseVeiculoErros {
   return {
@@ -409,8 +399,8 @@ function errosBase(e: Erros): CamposBaseVeiculoErros {
   }
 }
 
-// Adaptadores para o CamposProprietario. A venda não tem dataVenda (backend
-// usa hoje); ficamos com string vazia para cumprir o contrato do componente.
+// Na venda transacional não há dataVenda (backend usa hoje) — mantemos '' para
+// cumprir o contrato do CamposProprietario.
 function valoresCamposProprietario(
   np: { nomeCompleto: string; cpf: string; observacao: string } | null,
 ): CamposProprietarioValues {

@@ -9,8 +9,8 @@ import { useExcluirVeiculoMutation } from './hooks/useExcluirVeiculoMutation'
 
 type Props = {
   veiculo: Veiculo
-  // undefined = ainda carregando o histórico. Enquanto isso o botão fica
-  // desabilitado — não sabemos ainda se a exclusão é permitida.
+  // `undefined` = histórico ainda carregando; deixamos o botão desabilitado
+  // até saber se a exclusão é permitida pela regra do backend.
   proprietarios: Proprietario[] | undefined
 }
 
@@ -43,12 +43,10 @@ export function AcaoExcluirVeiculo({ veiculo, proprietarios }: Props) {
       onSuccess: () => {
         toast.show({ variant: 'success', title: 'Veículo excluído' })
         setAberto(false)
-        // A lista já foi invalidada pela mutation — o próximo render busca fresco.
         navigate('/veiculos')
       },
       onError: (err) => {
-        // O backend é a fonte da verdade. Mesmo com o bloqueio no front,
-        // pode haver casos de corrida (proprietário criado por outra sessão).
+        // Backend é a verdade — corrida (proprietário criado em outra sessão) pode passar do front.
         const mensagem = err instanceof Error ? err.message : String(err)
         toast.show({
           variant: 'error',

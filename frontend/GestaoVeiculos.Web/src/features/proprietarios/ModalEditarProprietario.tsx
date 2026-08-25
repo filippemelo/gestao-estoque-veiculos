@@ -16,7 +16,6 @@ import { useAtualizarProprietarioMutation } from './hooks/useProprietarioMutatio
 type Props = {
   aberto: boolean
   onFechar: () => void
-  // O modal só faz sentido quando temos um proprietário concreto.
   proprietario: Proprietario | null
 }
 
@@ -27,8 +26,7 @@ const ORDEM_CAMPOS: readonly (keyof CamposProprietarioValues)[] = [
   'dataVenda',
 ]
 
-// Converte "2026-08-24T00:00:00" (do backend) para "2026-08-24"
-// (que é o formato do <input type="date">).
+// Backend devolve "2026-08-24T00:00:00"; <input type="date"> espera "2026-08-24".
 function paraIsoDate(v: string | null | undefined): string {
   if (!v) return ''
   return v.slice(0, 10)
@@ -38,8 +36,7 @@ export function ModalEditarProprietario({ aberto, onFechar, proprietario }: Prop
   const toast = useToast()
   const mutation = useAtualizarProprietarioMutation(proprietario?.id ?? 0)
 
-  // Valores iniciais derivados do proprietário — quando o modal reabre com
-  // outro proprietário, reinicializamos via padrão setState-durante-render.
+  // Reinicializa quando o modal reabre com outro proprietário (setState-durante-render).
   const iniciais = useMemo<CamposProprietarioValues>(
     () =>
       proprietario
@@ -98,8 +95,7 @@ export function ModalEditarProprietario({ aberto, onFechar, proprietario }: Prop
     e.preventDefault()
     if (!proprietario || mutation.isPending) return
 
-    // Regra do backend: proprietário já encerrado não pode ter dataVenda
-    // removida. Espelhamos aqui para dar erro imediato no campo.
+    // Backend rejeita remover dataVenda de proprietário já encerrado — espelhamos.
     const jaEstavaEncerrado = Boolean(proprietario.dataVenda)
     if (jaEstavaEncerrado && !values.dataVenda) {
       const msg = 'Não é permitido remover a data de venda de um proprietário já encerrado.'

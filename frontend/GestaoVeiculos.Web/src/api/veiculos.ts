@@ -1,6 +1,3 @@
-// Client tipado dos endpoints de /veiculos.
-// Normaliza os envelopes do backend (dados / paginado) antes de devolver ao app.
-
 import { request } from './http'
 import type {
   AtualizarVeiculoRequest,
@@ -13,8 +10,7 @@ import type {
   VeiculoDetalhe,
 } from './types'
 
-// Aceita tanto array puro quanto envelope paginado — o resto do app enxerga
-// sempre o mesmo formato { items, page, pageSize, total, totalPages }.
+// Aceita array puro OU envelope paginado; devolve sempre o formato normalizado.
 function normalizarPaginado<T>(
   raw: EnvelopePaginadoBackend<T> | T[],
   fallback: { page: number; pageSize: number },

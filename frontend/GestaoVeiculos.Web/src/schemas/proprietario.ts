@@ -1,15 +1,7 @@
-// Schemas de validação para o domínio Proprietário.
-//
-// Notas de contrato:
-// - POST /proprietarios não recebe `dataAquisicao` (backend usa DateTime.Today).
-// - Atualizar precisa da `dataAquisicao` original para validar que `dataVenda`
-//   não seja anterior a ela. Como esse valor não faz parte do payload enviado
-//   ao backend, o schema de atualizar é uma factory que recebe essa referência.
-
 import { z } from 'zod'
 
 const CPF_REGEX = /^(\d{11}|\d{3}\.\d{3}\.\d{3}-\d{2})$/
-const DATA_ISO_REGEX = /^\d{4}-\d{2}-\d{2}$/ // YYYY-MM-DD, o formato do <input type="date">
+const DATA_ISO_REGEX = /^\d{4}-\d{2}-\d{2}$/
 
 const nomeCompletoField = z
   .string()
@@ -30,7 +22,7 @@ const observacaoField = z
   .optional()
   .nullable()
 
-// -------------------- Criar --------------------
+// POST /proprietarios não recebe `dataAquisicao` — o backend usa DateTime.Today.
 export const criarProprietarioSchema = z.object({
   veiculoId: z
     .number({ error: 'Informe o veículo.' })
@@ -41,9 +33,7 @@ export const criarProprietarioSchema = z.object({
   observacao: observacaoField,
 })
 
-// -------------------- Atualizar --------------------
-// O regex já garante YYYY-MM-DD; a comparação usa T00:00:00 para eliminar
-// influência de fuso — comparação puramente por data-calendário.
+// Compara puramente por data-calendário (T00:00:00 elimina o fuso).
 function paraDataLocal(iso: string): Date {
   return new Date(`${iso}T00:00:00`)
 }
@@ -60,8 +50,8 @@ const dataVendaField = z
   .optional()
   .nullable()
 
-// Factory: recebe a dataAquisicao já conhecida (imutável no backend) e
-// devolve o schema com o refinamento cruzado.
+// Factory: recebe a dataAquisicao (imutável no backend) e devolve o schema
+// já com o refinamento cruzado — não faz parte do payload enviado.
 export function criarAtualizarProprietarioSchema(opts: {
   dataAquisicao: Date | string
 }) {
@@ -80,7 +70,7 @@ export function criarAtualizarProprietarioSchema(opts: {
     .superRefine((valor, ctx) => {
       if (!valor.dataVenda) return
       const venda = paraDataLocal(valor.dataVenda)
-      if (Number.isNaN(venda.getTime())) return // regex já cobre; guarda extra.
+      if (Number.isNaN(venda.getTime())) return
 
       if (venda.getTime() < dataAquisicao.getTime()) {
         ctx.addIssue({
@@ -101,8 +91,7 @@ export function criarAtualizarProprietarioSchema(opts: {
     })
 }
 
-// Tipo inferido: como a factory devolve schemas diferentes por instância,
-// o tipo do payload é fixado aqui para consumo externo.
+// Fixado aqui porque a factory devolve schemas diferentes por instância.
 export type AtualizarProprietarioInput = {
   nomeCompleto: string
   cpf: string

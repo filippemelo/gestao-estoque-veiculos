@@ -6,7 +6,7 @@ type EmptyStateProps = {
   title: string
   description?: ReactNode
   action?: ReactNode
-  // Reduz o padding vertical para uso dentro de cards (histórico embutido, etc.).
+  // Reduz o padding vertical para uso dentro de cards.
   compact?: boolean
 }
 

@@ -10,10 +10,7 @@ import type {
   CriarProprietarioRequest,
 } from '@/api/types'
 
-// Todas as mutations do domínio "proprietário no contexto de um veículo".
-// Invalidamos ambos os escopos: o histórico (proprietarios) e o detalhe do
-// veículo (que pode ter mudado a situação em consequência, como no encerramento).
-
+// Encerrar posse muda a situação do veículo — invalidamos ambos os escopos.
 function invalidacoes(queryClient: ReturnType<typeof useQueryClient>) {
   queryClient.invalidateQueries({ queryKey: ['proprietarios'] })
   queryClient.invalidateQueries({ queryKey: ['veiculos'] })

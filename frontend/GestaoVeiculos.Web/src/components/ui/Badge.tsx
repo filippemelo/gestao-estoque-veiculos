@@ -33,7 +33,7 @@ export function Badge({ variant = 'neutral', children, className }: BadgeProps) 
   )
 }
 
-// Badge dedicado à situação do veículo — cores fixas em toda a aplicação.
+// Cor por situação é consistente em toda a aplicação.
 type BadgeSituacaoProps = { situacao: Situacao | string; className?: string }
 
 export function BadgeSituacao({ situacao, className }: BadgeSituacaoProps) {

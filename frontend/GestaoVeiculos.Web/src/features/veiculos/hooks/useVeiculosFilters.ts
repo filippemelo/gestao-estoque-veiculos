@@ -4,9 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 import type { Situacao } from '@/api/types'
 import { SITUACOES } from '@/api/types'
 
-// Fonte da verdade dos filtros = query string da URL.
-// Ao mudar, também zeramos `page` (todo filtro reseta pra primeira página).
-
+// Fonte da verdade dos filtros é a query string; mudança de filtro reseta a página.
 export const PAGE_SIZE_PADRAO = 20
 
 export type FiltrosVeiculos = {
@@ -48,7 +46,6 @@ export function useVeiculosFilters() {
             if (next.situacao) p.set('situacao', next.situacao)
             else p.delete('situacao')
           }
-          // Qualquer mudança de filtro reseta a página.
           p.delete('page')
           return p
         },

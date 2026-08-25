@@ -17,12 +17,10 @@ type Props = {
 const DEBOUNCE_MS = 400
 
 export function VeiculosFilters({ filtros, onFiltrosChange, onLimpar, temFiltro }: Props) {
-  // Estado local do input pra evitar chamar a API a cada tecla.
   const [inputMarca, setInputMarca] = useState(filtros.marca)
 
-  // Se a URL mudou "por fora" (limpar filtros, back/forward), reflete no
-  // input imediatamente — padrão setState-durante-render para derivar de
-  // props sem useEffect.
+  // Se a URL mudou por fora (limpar, back/forward), reflete no input imediatamente
+  // via setState-durante-render — sem useEffect.
   const [marcaSincronizada, setMarcaSincronizada] = useState(filtros.marca)
   if (filtros.marca !== marcaSincronizada) {
     setMarcaSincronizada(filtros.marca)
@@ -31,7 +29,6 @@ export function VeiculosFilters({ filtros, onFiltrosChange, onLimpar, temFiltro 
 
   const marcaDebounced = useDebouncedValue(inputMarca, DEBOUNCE_MS)
 
-  // Digitação → URL (após o debounce). Aqui é sync com sistema externo (router).
   useEffect(() => {
     if (marcaDebounced === filtros.marca) return
     onFiltrosChange({ marca: marcaDebounced })

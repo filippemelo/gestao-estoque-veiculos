@@ -14,8 +14,7 @@ import type {
 import { CamposBaseVeiculo } from './CamposBaseVeiculo'
 import { useCriarVeiculoMutation } from './hooks/useCriarVeiculoMutation'
 
-// Cadastro pede os 7 campos comuns (via CamposBaseVeiculo) + placa (editável).
-// Situação não aparece — o backend define como "Disponível".
+// Situação não aparece no cadastro — backend força "Disponível".
 type FormValues = CamposBaseVeiculoValues & { placa: string }
 type Campo = keyof FormValues
 type Erros = Partial<Record<Campo, string>>
@@ -214,7 +213,7 @@ function IconeSalvar() {
   )
 }
 
-// Slice do objeto de erros para passar ao CamposBaseVeiculo sem vazar `placa`.
+// Slice para o CamposBaseVeiculo (não passa `placa`).
 function errosBase(e: Erros): CamposBaseVeiculoErros {
   return {
     marca: e.marca,

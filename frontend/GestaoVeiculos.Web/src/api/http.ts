@@ -1,7 +1,3 @@
-// HTTP client — único ponto de contato com o backend.
-// Responsabilidades: base URL, JSON in/out, timeout, tradução de erros do
-// ProblemDetails para uma ApiError com mensagem legível.
-
 import type { ProblemDetails } from './types'
 
 const DEFAULT_TIMEOUT_MS = 15_000
@@ -65,7 +61,7 @@ function buildUrl(path: string, query: QueryParams | undefined): string {
   return url.toString()
 }
 
-// Une timeout local + signal externo (do react-query, por exemplo).
+// Combina timeout local com signal externo (ex.: cancelamento do react-query).
 function combineSignals(externalSignal: AbortSignal | undefined, timeoutMs: number) {
   const controller = new AbortController()
   const timeoutId = setTimeout(
@@ -102,7 +98,7 @@ async function parseResponseBody(response: Response): Promise<unknown> {
   if (response.status === 204) return null
   const contentType = response.headers.get('content-type') ?? ''
   if (contentType.includes('application/json') || contentType.includes('application/problem+json')) {
-    // Body pode estar vazio mesmo com content-type — tolerar.
+    // Alguns backends enviam content-type JSON com corpo vazio; toleramos.
     const text = await response.text()
     if (text === '') return null
     try {
@@ -123,7 +119,7 @@ function buildErrorMessage(status: number, body: unknown): {
 } {
   if (isProblemDetails(body)) {
     const pd = body
-    // Se houver "errors" (validação), concatena tudo em uma mensagem legível.
+    // Erros de validação vêm em `errors` — concatenamos para uma mensagem única.
     let extra = ''
     if (pd.errors) {
       const parts: string[] = []
@@ -143,7 +139,7 @@ function buildErrorMessage(status: number, body: unknown): {
   return { message: mensagemGenerica(status) }
 }
 
-// Fallback humano quando o backend não fornece detail nem title.
+// Fallback em pt-BR quando o backend não fornece detail nem title.
 function mensagemGenerica(status: number): string {
   if (status >= 500) return 'O servidor encontrou um problema. Tente novamente em instantes.'
   if (status === 404) return 'O recurso solicitado não foi encontrado.'
@@ -186,7 +182,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   } catch (err) {
     cleanup()
     if (err instanceof DOMException && err.name === 'AbortError') {
-      // Diferencia timeout de cancelamento externo.
+      // Cancelamento externo propaga; abort local vira timeout.
       if (externalSignal?.aborted) throw err
       throw new ApiError('Tempo limite excedido ao contatar a API.', 0)
     }

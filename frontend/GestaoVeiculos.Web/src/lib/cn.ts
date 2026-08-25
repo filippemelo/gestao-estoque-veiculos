@@ -1,5 +1,3 @@
-// Helper mínimo para concatenar classNames condicionais.
-// Aceita strings, undefined, false e objetos {classe: boolean}.
 export type ClassValue = string | number | null | undefined | false | Record<string, boolean>
 
 export function cn(...values: ClassValue[]): string {

@@ -4,8 +4,7 @@ import { Field, Input, Textarea } from '@/components/ui'
 import { formatarData } from '@/lib/format'
 import { mascararCPF } from '@/lib/mask'
 
-// Modelo controlado. `dataVenda` é uma string YYYY-MM-DD ('' quando vazio),
-// no formato produzido pelo <input type="date">.
+// `dataVenda` no formato YYYY-MM-DD do <input type="date">; '' quando vazio.
 export type CamposProprietarioValues = {
   nomeCompleto: string
   cpf: string
@@ -32,18 +31,12 @@ type Props = {
     valor: CamposProprietarioValues[K],
   ) => void
   disabled?: boolean
-  // Quando true, exibe o campo dataVenda. Usado na edição; oculto no cadastro
-  // pela venda transacional (backend preenche automaticamente).
+  // Cadastro pela venda transacional oculta este campo — backend preenche.
   mostrarDataVenda?: boolean
-  // Contexto para o hint da dataVenda (limite inferior).
   dataAquisicaoISO?: string
   refs?: CamposProprietarioRefs
 }
 
-// Grupo de campos de proprietário reusado por:
-//  - Seção "Novo proprietário" no formulário de edição de veículo (venda).
-//  - Modal "Adicionar proprietário" no detalhe do veículo.
-//  - Modal "Editar proprietário" no detalhe do veículo.
 export function CamposProprietario({
   values,
   erros = {},

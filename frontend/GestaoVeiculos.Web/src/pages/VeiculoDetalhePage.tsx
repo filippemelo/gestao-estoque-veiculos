@@ -20,8 +20,7 @@ export function VeiculoDetalhePage() {
 
   const veiculoQuery = useVeiculoDetalheQuery(id, idValido)
 
-  // Se a resposta do detalhe já traz `proprietarios`, usamos direto.
-  // Caso contrário, buscamos separadamente em /proprietarios/veiculo/{id}.
+  // Fallback: se o detalhe não trouxer proprietarios embutido, buscamos separado.
   const proprietariosEmbutidos = Array.isArray(veiculoQuery.data?.proprietarios)
     ? veiculoQuery.data.proprietarios
     : undefined
@@ -36,7 +35,6 @@ export function VeiculoDetalhePage() {
   const temProprietarioAtual =
     (proprietarios ?? []).some((p) => p.isProprietarioAtual) || false
 
-  // -------------------- Estados de topo --------------------
   if (!idValido) return <NaoEncontrado navigate={navigate} descricao="Identificador inválido." />
 
   if (veiculoQuery.isError) {
@@ -79,7 +77,6 @@ export function VeiculoDetalhePage() {
 
   const veiculo = veiculoQuery.data
 
-  // -------------------- Sucesso --------------------
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
@@ -128,7 +125,6 @@ export function VeiculoDetalhePage() {
   )
 }
 
-// -------------------- Auxiliares --------------------
 function CabecalhoCarregando() {
   return (
     <header className="flex items-center justify-between gap-3">

@@ -82,7 +82,6 @@ export function VeiculosListaPage() {
 
     if (!dados) return null
 
-    // Vazio: distingue "sem cadastro" de "sem resultado com filtro".
     if (items.length === 0) {
       if (temFiltro) {
         return (
@@ -98,7 +97,6 @@ export function VeiculosListaPage() {
         )
       }
       if (dados.total > 0 && filtros.page > dados.totalPages) {
-        // Página fora do intervalo (ex.: refresh depois de exclusão).
         return (
           <EmptyState
             title="Página fora do intervalo"

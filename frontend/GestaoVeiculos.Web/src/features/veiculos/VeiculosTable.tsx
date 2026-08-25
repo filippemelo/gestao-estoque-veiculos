@@ -9,7 +9,6 @@ type Props = {
   carregando: boolean
 }
 
-// Tabela para telas médias/grandes. Em mobile o pai renderiza cards em vez disso.
 export function VeiculosTable({ veiculos, carregando }: Props) {
   return (
     <div className="hidden md:block">

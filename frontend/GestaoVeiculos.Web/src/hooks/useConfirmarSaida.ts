@@ -1,14 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useBlocker } from 'react-router-dom'
 
-// Hook para segurar a navegação enquanto houver alterações não salvas.
-// Combina duas coisas:
-//  - useBlocker do react-router para navegações internas (Link, navigate),
-//    devolvendo um estado "blocked" que o componente usa para pedir confirmação.
-//  - beforeunload nativo para fechamento da aba / reload do navegador.
-//
-// Uso ref pra o callback do useBlocker enxergar o valor mais recente sem
-// depender do fechamento de render.
 export function useConfirmarSaida(deveBloquear: boolean) {
   const bloquearRef = useRef(deveBloquear)
   useEffect(() => {
@@ -37,8 +29,7 @@ export function useConfirmarSaida(deveBloquear: boolean) {
     cancelarSaida: () => blocker.reset?.(),
     // Libera o bloqueio SÍNCRONAMENTE. Necessário quando o consumidor vai
     // salvar e navegar no mesmo tick: sem isso, o navigate acontece antes
-    // do useEffect que sincroniza o ref, e o Modal "Descartar alterações?"
-    // aparece indevidamente.
+    // do useEffect sincronizar o ref e o Modal aparece indevidamente.
     liberar: () => {
       bloquearRef.current = false
     },

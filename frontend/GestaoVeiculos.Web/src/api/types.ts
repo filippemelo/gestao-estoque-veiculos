@@ -1,15 +1,7 @@
-// Tipos de domínio e de contrato compartilhados por toda a camada de API.
-// Nomes de campos de negócio ficam em português (situacao, proprietarioAtual)
-// porque espelham a linguagem do domínio; nomes de infraestrutura ficam em inglês.
-
-// -------------------- Enums do domínio --------------------
-// Fonte da verdade: src/schemas/enums.ts (schemas Zod). Re-exportado
-// aqui para manter compatibilidade com quem já importava de @/api/types.
 import type { Situacao } from '@/schemas/enums'
 export type { Situacao, Tipo } from '@/schemas/enums'
 export { SITUACOES, TIPOS } from '@/schemas/enums'
 
-// -------------------- Entidades --------------------
 export type Veiculo = {
   id: number
   marca: string
@@ -34,14 +26,12 @@ export type Proprietario = {
   isProprietarioAtual: boolean
 }
 
-// Detalhe do veículo — normalmente vem com o histórico de proprietários
-// embutido. Marcado como opcional para o consumidor ter fallback explícito
-// (chamar /proprietarios/veiculo/{id}) caso o backend um dia deixe de embutir.
+// Opcional para permitir fallback quando o backend não trouxer o histórico
+// embutido — o consumidor pode buscar em /proprietarios/veiculo/{id}.
 export type VeiculoDetalhe = Veiculo & {
   proprietarios?: Proprietario[]
 }
 
-// -------------------- Requests --------------------
 export type CriarVeiculoRequest = {
   marca: string
   modelo: string
@@ -59,8 +49,8 @@ export type NovoProprietarioRequest = {
   observacao?: string | null
 }
 
-// PUT /veiculos/{id} — não recebe placa (imutável). Quando situacao === 'Vendido',
-// novoProprietario é obrigatório e a chamada faz a venda transacional.
+// PUT /veiculos/{id} não recebe placa (imutável). Quando situacao === 'Vendido',
+// novoProprietario passa a ser obrigatório e a chamada faz a venda transacional.
 export type AtualizarVeiculoRequest = {
   marca: string
   modelo: string
@@ -94,10 +84,8 @@ export type ListarVeiculosParams = {
   pageSize?: number
 }
 
-// -------------------- Envelopes --------------------
-// Como o backend responde: item único vem em { dados: T } e listagem em
-// { dados: T[], pagina, tamanho, total, totalPaginas }. Isolamos esses envelopes
-// aqui — o resto do app consome os formatos normalizados abaixo.
+// Envelope do backend: item único vem em { dados: T } e listagem em
+// { dados: T[], pagina, tamanho, total, totalPaginas }.
 export type EnvelopeDados<T> = { dados: T }
 export type EnvelopePaginadoBackend<T> = {
   dados: T[]
@@ -107,7 +95,7 @@ export type EnvelopePaginadoBackend<T> = {
   totalPaginas: number
 }
 
-// Formato normalizado que os hooks/telas enxergam.
+// Formato normalizado consumido pelos hooks/telas.
 export type PaginaResultado<T> = {
   items: T[]
   page: number
@@ -116,8 +104,7 @@ export type PaginaResultado<T> = {
   totalPages: number
 }
 
-// -------------------- ProblemDetails --------------------
-// Formato de erro produzido pelo GlobalExceptionHandler do backend.
+// ProblemDetails produzido pelo GlobalExceptionHandler do backend.
 export type ProblemDetails = {
   type?: string
   title?: string

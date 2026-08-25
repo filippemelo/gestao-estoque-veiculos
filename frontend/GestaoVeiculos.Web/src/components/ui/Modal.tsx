@@ -28,7 +28,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
     if (!open && dialog.open) dialog.close()
   }, [open])
 
-  // O <dialog> nativo dispara 'close' quando o usuário aperta ESC.
+  // ESC no <dialog> dispara 'close' nativamente — propagamos para o pai.
   useEffect(() => {
     const dialog = ref.current
     if (!dialog) return
@@ -37,7 +37,6 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
     return () => dialog.removeEventListener('close', handler)
   }, [onClose])
 
-  // Clique fora (no backdrop) fecha o modal.
   function onBackdropClick(e: React.MouseEvent<HTMLDialogElement>) {
     if (e.target === ref.current) onClose()
   }
@@ -64,7 +63,6 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
           aria-label="Fechar"
           className="rounded p-1 text-slate-500 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
-          {/* X simples em SVG para evitar dep de ícones. */}
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden>
             <path d="M4.3 4.3a1 1 0 011.4 0L10 8.6l4.3-4.3a1 1 0 111.4 1.4L11.4 10l4.3 4.3a1 1 0 01-1.4 1.4L10 11.4l-4.3 4.3a1 1 0 01-1.4-1.4L8.6 10 4.3 5.7a1 1 0 010-1.4z" />
           </svg>

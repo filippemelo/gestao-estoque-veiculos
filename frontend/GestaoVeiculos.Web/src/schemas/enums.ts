@@ -1,12 +1,6 @@
-// Enums do domínio.
-// Os schemas Zod são a fonte da verdade — SITUACOES/TIPOS e os tipos
-// derivados são exportados a partir daqui e re-exportados por
-// src/api/types.ts para manter o consumo pelos módulos existentes.
-//
-// A grafia (com acento) foi confirmada na Etapa 1 chamando o backend.
-
 import { z } from 'zod'
 
+// Grafia (com acento) confirmada chamando o backend — precisa bater exatamente.
 export const situacaoSchema = z.enum(['Disponível', 'Reservado', 'Vendido'], {
   error: 'Selecione a situação.',
 })

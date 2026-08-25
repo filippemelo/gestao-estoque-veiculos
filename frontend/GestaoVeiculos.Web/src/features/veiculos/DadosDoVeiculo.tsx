@@ -8,8 +8,6 @@ type Props = {
   veiculo: Veiculo
 }
 
-// Painel somente-leitura com os dados do veículo. A situação recebe destaque
-// no topo, ao lado do identificador principal (placa).
 export function DadosDoVeiculo({ veiculo }: Props) {
   return (
     <section

@@ -8,7 +8,6 @@ export function useCriarVeiculoMutation() {
   return useMutation({
     mutationFn: (payload: CriarVeiculoInput) => criarVeiculo(payload),
     onSuccess: () => {
-      // Invalida qualquer variante da listagem — o próximo acesso vê o novo item.
       queryClient.invalidateQueries({ queryKey: ['veiculos'] })
     },
   })

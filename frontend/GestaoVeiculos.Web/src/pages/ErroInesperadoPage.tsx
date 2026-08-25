@@ -2,9 +2,6 @@ import { isRouteErrorResponse, Link, useRouteError } from 'react-router-dom'
 
 import { Button } from '@/components/ui'
 
-// Página de erro global — capturada pelo `errorElement` do router.
-// Ativa quando uma tela lança durante renderização ou uma rota não pode
-// ser carregada (ex.: chunk lazy-load falhou).
 export function ErroInesperadoPage() {
   const err = useRouteError()
 

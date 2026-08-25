@@ -30,9 +30,8 @@ type Props = {
   temProprietarioAtual: boolean
 }
 
-// Bloco Histórico de proprietários. Ordena defensivamente por dataAquisicao
-// (o backend já ordena, mas quando o array vem embutido no VeiculoDetalhe
-// não temos essa garantia formal).
+// Ordena por dataAquisicao — quando o array vem embutido no VeiculoDetalhe
+// não há garantia formal de ordem.
 export function HistoricoProprietarios({
   proprietarios,
   carregando,
@@ -41,7 +40,6 @@ export function HistoricoProprietarios({
   onAdicionar,
   temProprietarioAtual,
 }: Props) {
-  // Um único estado para o modal editar — abre para o proprietário selecionado.
   const [editando, setEditando] = useState<Proprietario | null>(null)
 
   return (

@@ -33,7 +33,6 @@ export function TR({ className, ...rest }: HTMLAttributes<HTMLTableRowElement>) 
   return (
     <tr
       className={cn(
-        // Zebra visível por padrão + hover no acento primary (identidade teal).
         'even:bg-slate-50 motion-safe:transition-colors hover:bg-primary-50',
         className,
       )}
@@ -52,7 +51,7 @@ export function TH({ className, numeric, ...rest }: CellProps) {
       scope="col"
       className={cn(
         'px-4 py-3 font-medium',
-        // Mutuamente exclusivo — evita dependência da ordem no CSS de saída.
+        // Ternário mutuamente exclusivo — não depende da ordem do CSS de saída.
         numeric ? 'text-right num' : 'text-left',
         className,
       )}

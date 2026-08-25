@@ -8,8 +8,7 @@ export function useAtualizarVeiculoMutation(id: number) {
   return useMutation({
     mutationFn: (payload: AtualizarVeiculoInput) => atualizarVeiculo(id, payload),
     onSuccess: () => {
-      // Preço, situação, km e proprietário atual mudam — invalidamos ambos os
-      // domínios pra o detalhe e a lista voltarem sincronizados.
+      // Uma atualização pode mudar situação e proprietário atual — invalidamos ambos.
       queryClient.invalidateQueries({ queryKey: ['veiculos'] })
       queryClient.invalidateQueries({ queryKey: ['proprietarios'] })
     },

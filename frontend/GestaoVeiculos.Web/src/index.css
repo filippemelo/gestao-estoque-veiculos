@@ -1,33 +1,13 @@
 /*
- * DESIGN TOKENS — Gestão de Veículos
- * ---------------------------------------------------------------
- * Ferramenta interna de revenda usada o dia inteiro por operadores.
- * Prioridade: densidade de informação e leitura rápida.
+ * Design tokens do app.
  *
- * Paleta
- *   • Superfície: slate (neutra fria). Fundo `surface`, papel branco.
- *   • Acento único: `primary` (teal escuro) — usado apenas em ações
- *     primárias, links e estados de foco. Não usar como enfeite.
- *   • Cores por situação (badges): consistentes em toda a aplicação.
- *     - Disponível → verde (emerald)
- *     - Reservado  → âmbar
- *     - Vendido    → cinza (encerrado, não deve chamar atenção)
- *   • `danger` para destrutivo/erro.
- *
- * Tipografia
- *   • Uma família só: system stack começando por Inter. Sem serifas.
- *   • Escala usada: xs=12, sm=14, base=16, lg=18, xl=20, 2xl=24.
- *   • Dados numéricos (preço, km, ano, placa, CPF) usam .num
- *     (font-variant-numeric: tabular-nums) para alinhar em coluna.
- *
- * Foco
- *   • Anel de foco visível SEMPRE em elementos interativos
- *     (`focus-visible:ring-2` + `ring-primary-500`).
- *
- * Motion
- *   • Transições curtas (150ms). Respeitam prefers-reduced-motion
- *     via `motion-safe:` no Tailwind.
- * ---------------------------------------------------------------
+ * Regras de uso não óbvias:
+ *   • `primary` (teal) é o único acento — reservar para ações primárias,
+ *     links e foco. Não decorar com ele.
+ *   • Cores de situação (Disponível/Reservado/Vendido) são fixas em toda
+ *     a UI — nunca substituir por tokens genéricos.
+ *   • `.num` (tabular-nums) obrigatório em dados numéricos que aparecem
+ *     em coluna (preço, km, ano, placa, CPF).
  */
 
 @import 'tailwindcss';
@@ -83,7 +63,6 @@
     'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* Base global — sem reset além do que o Tailwind Preflight já faz */
 html,
 body {
   background-color: var(--color-surface);
@@ -91,7 +70,6 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Utilitário para alinhar dados numéricos em coluna */
 .num {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';

@@ -1,6 +1,5 @@
-// Client tipado dos endpoints de /proprietarios.
-// NÃO existe função de listagem geral: proprietários só aparecem no contexto
-// de um veículo (ver GET /proprietarios/veiculo/{veiculoId}).
+// Não expomos listagem geral de proprietários: por decisão do produto,
+// proprietário só aparece no contexto de um veículo.
 
 import { request } from './http'
 import type {
@@ -17,7 +16,7 @@ function desembrulhar<T>(raw: EnvelopeDados<T> | T): T {
   return raw as T
 }
 
-// Ordena por dataAquisicao crescente — o histórico é sempre exibido nessa ordem.
+// Ordenação por dataAquisicao é contrato de UI (histórico exibido crescente).
 function ordenarPorAquisicao(lista: Proprietario[]): Proprietario[] {
   return [...lista].sort((a, b) => a.dataAquisicao.localeCompare(b.dataAquisicao))
 }

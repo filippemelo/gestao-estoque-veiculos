@@ -4,9 +4,8 @@ import type { Tipo } from '@/api/types'
 import { TIPOS } from '@/api/types'
 import { Field, Input, InputMoedaBRL, Select } from '@/components/ui'
 
-// Sete campos comuns aos formulários de novo e editar veículo.
-// Placa (editável no cadastro, readonly na edição) e Situação (só na edição)
-// ficam fora — cada formulário os monta em volta deste componente.
+// Placa e Situação ficam fora — cada formulário os monta em volta,
+// porque têm comportamento diferente (placa editável/readonly, situação só na edição).
 
 export type CamposBaseVeiculoValues = {
   marca: string

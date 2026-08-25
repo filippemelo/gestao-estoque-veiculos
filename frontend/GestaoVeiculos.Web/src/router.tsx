@@ -12,7 +12,6 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppShell />,
-    // Error boundary global: captura erros de renderização e falhas de rota.
     errorElement: <ErroInesperadoPage />,
     children: [
       { index: true, element: <Navigate to="/veiculos" replace /> },
