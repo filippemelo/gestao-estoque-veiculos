@@ -70,19 +70,19 @@ gestao-estoque-veiculos/
 
 ## Banco de Dados
 
-> **Observação:** durante o desenvolvimento local foi utilizado o Oracle Database via Docker (imagem [`gvenzl/oracle-free`](https://github.com/gvenzl/oci-oracle-free)):
->
-> ```bash
-> docker run -d --name oracle-free -p 1521:1521 -e ORACLE_PASSWORD=SUA_SENHA gvenzl/oracle-free:slim
-> ```
->
-> Após o container subir, conecte-se como `SYSTEM` no serviço `freepdb1` e crie o usuário/schema da aplicação:
->
-> ```sql
-> CREATE USER estoque IDENTIFIED BY SUA_SENHA;
-> GRANT CONNECT, RESOURCE TO estoque;
-> ALTER USER estoque QUOTA UNLIMITED ON USERS;
-> ```
+**Observação:** durante o desenvolvimento local foi utilizado o Oracle Database via Docker (imagem [`gvenzl/oracle-free`](https://github.com/gvenzl/oci-oracle-free)):
+
+```bash
+docker run -d --name oracle-free -p 1521:1521 -e ORACLE_PASSWORD=SUA_SENHA gvenzl/oracle-free:slim
+```
+
+Após o container subir, conecte-se como `SYSTEM` no serviço `freepdb1` e crie o usuário/schema da aplicação:
+
+```sql
+CREATE USER estoque IDENTIFIED BY SUA_SENHA;
+GRANT CONNECT, RESOURCE TO estoque;
+ALTER USER estoque QUOTA UNLIMITED ON USERS;
+```
 
 1. Crie um usuário/schema no Oracle (ex.: `estoque`) com permissão para criar tabelas.
 2. Execute o script [database/create_tables.sql](database/create_tables.sql) conectado a esse usuário. Ele cria as tabelas `VEICULO` e `PROPRIETARIO` (com FK e constraints).
