@@ -115,7 +115,7 @@ async function parseResponseBody(response: Response): Promise<unknown> {
   return text === '' ? null : text
 }
 
-function buildErrorMessage(status: number, body: unknown, statusText: string): {
+function buildErrorMessage(status: number, body: unknown): {
   message: string
   title?: string
   detail?: string
@@ -134,13 +134,24 @@ function buildErrorMessage(status: number, body: unknown, statusText: string): {
     }
     const message = pd.detail?.trim()
       ? `${pd.detail}${extra}`
-      : (pd.title ?? `HTTP ${status} ${statusText}`) + extra
+      : (pd.title ?? mensagemGenerica(status)) + extra
     return { message, title: pd.title, detail: pd.detail, problemDetails: pd }
   }
   if (typeof body === 'string' && body.trim() !== '') {
     return { message: body, detail: body }
   }
-  return { message: `HTTP ${status} ${statusText}` }
+  return { message: mensagemGenerica(status) }
+}
+
+// Fallback humano quando o backend não fornece detail nem title.
+function mensagemGenerica(status: number): string {
+  if (status >= 500) return 'O servidor encontrou um problema. Tente novamente em instantes.'
+  if (status === 404) return 'O recurso solicitado não foi encontrado.'
+  if (status === 403) return 'Você não tem permissão para essa operação.'
+  if (status === 401) return 'Sessão expirada. Faça login novamente.'
+  if (status === 409) return 'Não foi possível concluir por conflito de estado.'
+  if (status >= 400) return 'Requisição inválida.'
+  return 'Não foi possível concluir a solicitação.'
 }
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -193,7 +204,6 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     const { message, title, detail, problemDetails } = buildErrorMessage(
       response.status,
       parsedBody,
-      response.statusText,
     )
     throw new ApiError(message, response.status, { title, detail, problemDetails })
   }

@@ -10,7 +10,6 @@ import {
   ConfirmDialog,
   Field,
   Input,
-  InputMoedaBRL,
   Select,
   useToast,
 } from '@/components/ui'
@@ -23,6 +22,11 @@ import { useConfirmarSaida } from '@/hooks/useConfirmarSaida'
 import { formatarPlaca } from '@/lib/format'
 import { atualizarVeiculoSchema } from '@/schemas/veiculo'
 
+import type {
+  CamposBaseVeiculoErros,
+  CamposBaseVeiculoValues,
+} from './CamposBaseVeiculo'
+import { CamposBaseVeiculo } from './CamposBaseVeiculo'
 import { useAtualizarVeiculoMutation } from './hooks/useAtualizarVeiculoMutation'
 
 // -------------------- Modelo de formulário --------------------
@@ -32,29 +36,12 @@ type NovoProprietarioForm = {
   observacao: string
 }
 
-type FormValues = {
-  marca: string
-  modelo: string
-  ano: number | ''
-  cor: string
-  preco: number | ''
-  tipo: Tipo | ''
+type FormValues = CamposBaseVeiculoValues & {
   situacao: Situacao
-  quilometragem: number | ''
   novoProprietario: NovoProprietarioForm | null
 }
 
-type CampoTexto = 'marca' | 'modelo' | 'cor'
-type CampoNumerico = 'ano' | 'preco' | 'quilometragem'
-type Campo =
-  | 'marca'
-  | 'modelo'
-  | 'ano'
-  | 'cor'
-  | 'preco'
-  | 'tipo'
-  | 'situacao'
-  | 'quilometragem'
+type Campo = keyof CamposBaseVeiculoValues | 'situacao'
 
 // Ordem física do formulário — usada para focar o primeiro erro no submit.
 const ORDEM_CAMPOS: readonly string[] = [
@@ -126,14 +113,14 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
 
   const { estaBloqueado, confirmarSaida, cancelarSaida } = useConfirmarSaida(dirty)
 
-  // Refs para focar no primeiro erro. Chaves seguem os paths do Zod.
+  // Refs para focar no primeiro erro.
   const refMarca = useRef<HTMLInputElement>(null)
   const refModelo = useRef<HTMLInputElement>(null)
   const refAno = useRef<HTMLInputElement>(null)
   const refCor = useRef<HTMLInputElement>(null)
   const refTipo = useRef<HTMLSelectElement>(null)
   const refPreco = useRef<HTMLInputElement>(null)
-  const refQuilometragem = useRef<HTMLInputElement>(null)
+  const refKm = useRef<HTMLInputElement>(null)
   const refSituacao = useRef<HTMLSelectElement>(null)
   const refNovoPropNome = useRef<HTMLInputElement>(null)
   const refNovoPropCpf = useRef<HTMLInputElement>(null)
@@ -146,7 +133,7 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
     cor: refCor,
     tipo: refTipo,
     preco: refPreco,
-    quilometragem: refQuilometragem,
+    quilometragem: refKm,
     situacao: refSituacao,
     // Erro no bloco inteiro aponta para o primeiro campo da seção.
     novoProprietario: refNovoPropNome,
@@ -209,9 +196,8 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
   }
 
   function validarCampoRaiz(campo: Campo) {
-    const parcial = atualizarVeiculoSchema
-      // Passamos o objeto inteiro para o schema aplicar cross-refinements.
-      .safeParse(paraPayload(values))
+    // Passamos o objeto inteiro para o schema aplicar cross-refinements.
+    const parcial = atualizarVeiculoSchema.safeParse(paraPayload(values))
     if (parcial.success) {
       setErros((e) => (e[campo] ? { ...e, [campo]: undefined } : e))
       return
@@ -280,11 +266,10 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
         navigate(`/veiculos/${veiculoInicial.id}`)
       },
       onError: (err) => {
-        const mensagem = err instanceof Error ? err.message : String(err)
         toast.show({
           variant: 'error',
           title: 'Não foi possível salvar as alterações',
-          description: mensagem,
+          description: err instanceof Error ? err.message : String(err),
         })
       },
     })
@@ -296,10 +281,7 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
     <>
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <div className="grid gap-4 rounded-md border border-border-subtle bg-white p-4 md:grid-cols-2">
-          <Field
-            label="Placa"
-            hint="A placa não pode ser alterada após o cadastro."
-          >
+          <Field label="Placa" hint="A placa não pode ser alterada após o cadastro.">
             {(p) => (
               <Input
                 {...p}
@@ -311,47 +293,22 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
             )}
           </Field>
 
-          {renderCampoTexto('marca', 'Marca')}
-          {renderCampoTexto('modelo', 'Modelo')}
-          {renderCampoNumericoInteiro('ano', 'Ano')}
-          {renderCampoTexto('cor', 'Cor')}
-
-          <Field label="Tipo" required error={erros.tipo}>
-            {(p) => (
-              <Select
-                {...p}
-                ref={refTipo}
-                value={values.tipo}
-                onChange={(e) => setCampo('tipo', e.target.value as Tipo | '')}
-                onBlur={() => validarCampoRaiz('tipo')}
-                disabled={enviando}
-                invalid={Boolean(erros.tipo)}
-              >
-                <option value="">Selecione…</option>
-                {TIPOS.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </Select>
-            )}
-          </Field>
-
-          <Field label="Preço (R$)" required error={erros.preco}>
-            {(p) => (
-              <InputMoedaBRL
-                {...p}
-                ref={refPreco}
-                value={values.preco}
-                onChange={(v) => setCampo('preco', v)}
-                onBlur={() => validarCampoRaiz('preco')}
-                disabled={enviando}
-                invalid={Boolean(erros.preco)}
-              />
-            )}
-          </Field>
-
-          {renderCampoNumericoInteiro('quilometragem', 'Quilometragem (km)')}
+          <CamposBaseVeiculo
+            values={values}
+            erros={errosBase(erros)}
+            onChange={(campo, valor) => setCampo(campo as Campo, valor as FormValues[Campo])}
+            onBlurCampo={(campo) => validarCampoRaiz(campo as Campo)}
+            disabled={enviando}
+            refs={{
+              marca: refMarca,
+              modelo: refModelo,
+              ano: refAno,
+              cor: refCor,
+              tipo: refTipo,
+              preco: refPreco,
+              quilometragem: refKm,
+            }}
+          />
 
           <Field label="Situação" required error={erros.situacao}>
             {(p) => (
@@ -431,54 +388,24 @@ export function FormularioEditarVeiculo({ veiculoInicial }: { veiculoInicial: Ve
       />
     </>
   )
+}
 
-  // -------------------- Renderers auxiliares --------------------
-  function renderCampoTexto(campo: CampoTexto, label: string) {
-    return (
-      <Field label={label} required error={erros[campo]}>
-        {(p) => (
-          <Input
-            {...p}
-            ref={refPorCampo[campo] as React.RefObject<HTMLInputElement>}
-            value={values[campo]}
-            onChange={(e) => setCampo(campo, e.target.value)}
-            onBlur={() => validarCampoRaiz(campo)}
-            disabled={enviando}
-            invalid={Boolean(erros[campo])}
-          />
-        )}
-      </Field>
-    )
-  }
-
-  function renderCampoNumericoInteiro(campo: CampoNumerico, label: string) {
-    return (
-      <Field label={label} required error={erros[campo]}>
-        {(p) => (
-          <Input
-            {...p}
-            ref={refPorCampo[campo] as React.RefObject<HTMLInputElement>}
-            type="number"
-            inputMode="numeric"
-            numeric
-            value={values[campo] === '' ? '' : String(values[campo])}
-            onChange={(e) => {
-              const v = e.target.value
-              setCampo(campo, v === '' ? '' : Number(v))
-            }}
-            onBlur={() => validarCampoRaiz(campo)}
-            disabled={enviando}
-            invalid={Boolean(erros[campo])}
-          />
-        )}
-      </Field>
-    )
+// -------------------- Adaptadores --------------------
+// Slice do objeto de erros para o CamposBaseVeiculo (só campos comuns).
+function errosBase(e: Erros): CamposBaseVeiculoErros {
+  return {
+    marca: e.marca,
+    modelo: e.modelo,
+    ano: e.ano,
+    cor: e.cor,
+    tipo: e.tipo,
+    preco: e.preco,
+    quilometragem: e.quilometragem,
   }
 }
 
-// -------------------- Adaptadores para o CamposProprietario --------------------
-// A venda não tem dataVenda (backend usa hoje); ficamos com string vazia
-// para cumprir o contrato de CamposProprietarioValues.
+// Adaptadores para o CamposProprietario. A venda não tem dataVenda (backend
+// usa hoje); ficamos com string vazia para cumprir o contrato do componente.
 function valoresCamposProprietario(
   np: { nomeCompleto: string; cpf: string; observacao: string } | null,
 ): CamposProprietarioValues {
@@ -497,4 +424,3 @@ function errosCamposProprietario(erros: Erros): CamposProprietarioErros {
     observacao: erros['novoProprietario.observacao'],
   }
 }
-

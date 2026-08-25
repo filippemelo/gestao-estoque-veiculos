@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { ApiError } from '@/api/http'
 import type { Proprietario, Veiculo } from '@/api/types'
 import { Button, ConfirmDialog, useToast } from '@/components/ui'
 import { formatarPlaca } from '@/lib/format'
@@ -51,10 +50,9 @@ export function AcaoExcluirVeiculo({ veiculo, proprietarios }: Props) {
         // O backend é a fonte da verdade. Mesmo com o bloqueio no front,
         // pode haver casos de corrida (proprietário criado por outra sessão).
         const mensagem = err instanceof Error ? err.message : String(err)
-        const eConflito = err instanceof ApiError && err.status === 409
         toast.show({
           variant: 'error',
-          title: eConflito ? 'Não foi possível excluir' : 'Falha ao excluir',
+          title: 'Não foi possível excluir o veículo',
           description: mensagem,
         })
         setAberto(false)

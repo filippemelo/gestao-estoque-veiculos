@@ -37,7 +37,7 @@ export function AcaoExcluirProprietario({ proprietario, children }: Props) {
       onError: (err) => {
         toast.show({
           variant: 'error',
-          title: 'Não foi possível excluir',
+          title: 'Não foi possível excluir o proprietário',
           description: err instanceof Error ? err.message : String(err),
         })
         setAberto(false)

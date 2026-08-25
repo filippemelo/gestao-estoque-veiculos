@@ -3,40 +3,23 @@ import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { ApiError } from '@/api/http'
-import type { Tipo } from '@/api/types'
-import { TIPOS } from '@/api/types'
-import {
-  BadgeSituacao,
-  Button,
-  Field,
-  Input,
-  InputMoedaBRL,
-  Select,
-  useToast,
-} from '@/components/ui'
+import { BadgeSituacao, Button, Field, Input, useToast } from '@/components/ui'
 import { mascararPlaca } from '@/lib/mask'
 import { criarVeiculoSchema } from '@/schemas/veiculo'
 
+import type {
+  CamposBaseVeiculoErros,
+  CamposBaseVeiculoValues,
+} from './CamposBaseVeiculo'
+import { CamposBaseVeiculo } from './CamposBaseVeiculo'
 import { useCriarVeiculoMutation } from './hooks/useCriarVeiculoMutation'
 
-// Estado local do formulário. Usa string / '' onde o input pode estar vazio,
-// e o Zod (no submit) reclama por "Informe X" para os campos obrigatórios.
-type FormValues = {
-  marca: string
-  modelo: string
-  ano: number | ''
-  cor: string
-  preco: number | ''
-  tipo: Tipo | ''
-  placa: string
-  quilometragem: number | ''
-}
-
-type CampoTexto = 'marca' | 'modelo' | 'cor' | 'placa'
-type CampoNumerico = 'ano' | 'preco' | 'quilometragem'
+// Cadastro pede os 7 campos comuns (via CamposBaseVeiculo) + placa (editável).
+// Situação não aparece — o backend define como "Disponível".
+type FormValues = CamposBaseVeiculoValues & { placa: string }
 type Campo = keyof FormValues
+type Erros = Partial<Record<Campo, string>>
 
-// Ordem física do formulário — usada para focar no primeiro erro após submit.
 const ORDEM_CAMPOS: readonly Campo[] = [
   'placa',
   'marca',
@@ -53,13 +36,11 @@ const VALORES_INICIAIS: FormValues = {
   modelo: '',
   ano: '',
   cor: '',
-  preco: '',
   tipo: '',
+  preco: '',
   placa: '',
   quilometragem: '',
 }
-
-type Erros = Partial<Record<Campo, string>>
 
 export function FormularioNovoVeiculo() {
   const navigate = useNavigate()
@@ -69,20 +50,28 @@ export function FormularioNovoVeiculo() {
   const [values, setValues] = useState<FormValues>(VALORES_INICIAIS)
   const [erros, setErros] = useState<Erros>({})
 
-  const refs: Record<Campo, React.RefObject<HTMLInputElement | HTMLSelectElement | null>> = {
-    marca: useRef<HTMLInputElement>(null),
-    modelo: useRef<HTMLInputElement>(null),
-    ano: useRef<HTMLInputElement>(null),
-    cor: useRef<HTMLInputElement>(null),
-    preco: useRef<HTMLInputElement>(null),
-    tipo: useRef<HTMLSelectElement>(null),
-    placa: useRef<HTMLInputElement>(null),
-    quilometragem: useRef<HTMLInputElement>(null),
+  const refPlaca = useRef<HTMLInputElement>(null)
+  const refMarca = useRef<HTMLInputElement>(null)
+  const refModelo = useRef<HTMLInputElement>(null)
+  const refAno = useRef<HTMLInputElement>(null)
+  const refCor = useRef<HTMLInputElement>(null)
+  const refTipo = useRef<HTMLSelectElement>(null)
+  const refPreco = useRef<HTMLInputElement>(null)
+  const refKm = useRef<HTMLInputElement>(null)
+
+  const refPorCampo: Record<Campo, React.RefObject<HTMLElement | null>> = {
+    placa: refPlaca,
+    marca: refMarca,
+    modelo: refModelo,
+    ano: refAno,
+    cor: refCor,
+    tipo: refTipo,
+    preco: refPreco,
+    quilometragem: refKm,
   }
 
   function setCampo<K extends Campo>(campo: K, valor: FormValues[K]) {
     setValues((v) => ({ ...v, [campo]: valor }))
-    // Se havia erro naquele campo, limpa ao começar a corrigir.
     setErros((e) => (e[campo] ? { ...e, [campo]: undefined } : e))
   }
 
@@ -100,7 +89,7 @@ export function FormularioNovoVeiculo() {
   function focarPrimeiroErro(errosNovos: Erros) {
     for (const campo of ORDEM_CAMPOS) {
       if (errosNovos[campo]) {
-        refs[campo].current?.focus()
+        refPorCampo[campo].current?.focus()
         return
       }
     }
@@ -108,7 +97,7 @@ export function FormularioNovoVeiculo() {
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    if (mutation.isPending) return // evita duplo submit
+    if (mutation.isPending) return
 
     const resultado = criarVeiculoSchema.safeParse(values)
     if (!resultado.success) {
@@ -125,21 +114,19 @@ export function FormularioNovoVeiculo() {
     mutation.mutate(resultado.data, {
       onSuccess: (veiculo) => {
         toast.show({ variant: 'success', title: 'Veículo salvo' })
-        // A API retorna o id — vamos direto para o detalhe.
         navigate(`/veiculos/${veiculo.id}`)
       },
       onError: (err) => {
         if (err instanceof ApiError && err.status === 409) {
           // Placa duplicada é o único 409 do POST /veiculos.
           setErros((prev) => ({ ...prev, placa: err.message }))
-          refs.placa.current?.focus()
+          refPlaca.current?.focus()
           return
         }
-        const mensagem = err instanceof Error ? err.message : String(err)
         toast.show({
           variant: 'error',
           title: 'Não foi possível salvar o veículo',
-          description: mensagem,
+          description: err instanceof Error ? err.message : String(err),
         })
       },
     })
@@ -159,7 +146,7 @@ export function FormularioNovoVeiculo() {
           {(p) => (
             <Input
               {...p}
-              ref={refs.placa as React.RefObject<HTMLInputElement>}
+              ref={refPlaca}
               value={values.placa}
               onChange={(e) => setCampo('placa', mascararPlaca(e.target.value))}
               onBlur={() => validarCampo('placa')}
@@ -172,47 +159,27 @@ export function FormularioNovoVeiculo() {
           )}
         </Field>
 
-        {renderCampoTexto('marca', 'Marca', 'Ex.: Chevrolet')}
-        {renderCampoTexto('modelo', 'Modelo', 'Ex.: Onix Plus LT 1.0 Turbo')}
-        {renderCampoNumericoInteiro('ano', 'Ano')}
-        {renderCampoTexto('cor', 'Cor', 'Ex.: Prata')}
-
-        <Field label="Tipo" required error={erros.tipo}>
-          {(p) => (
-            <Select
-              {...p}
-              ref={refs.tipo as React.RefObject<HTMLSelectElement>}
-              value={values.tipo}
-              onChange={(e) => setCampo('tipo', e.target.value as Tipo | '')}
-              onBlur={() => validarCampo('tipo')}
-              disabled={enviando}
-              invalid={Boolean(erros.tipo)}
-            >
-              <option value="">Selecione…</option>
-              {TIPOS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </Select>
-          )}
-        </Field>
-
-        <Field label="Preço (R$)" required error={erros.preco}>
-          {(p) => (
-            <InputMoedaBRL
-              {...p}
-              ref={refs.preco as React.RefObject<HTMLInputElement>}
-              value={values.preco}
-              onChange={(v) => setCampo('preco', v)}
-              onBlur={() => validarCampo('preco')}
-              disabled={enviando}
-              invalid={Boolean(erros.preco)}
-            />
-          )}
-        </Field>
-
-        {renderCampoNumericoInteiro('quilometragem', 'Quilometragem (km)')}
+        <CamposBaseVeiculo
+          values={values}
+          erros={errosBase(erros)}
+          onChange={(campo, valor) => setCampo(campo as Campo, valor as FormValues[Campo])}
+          onBlurCampo={validarCampo}
+          disabled={enviando}
+          refs={{
+            marca: refMarca,
+            modelo: refModelo,
+            ano: refAno,
+            cor: refCor,
+            tipo: refTipo,
+            preco: refPreco,
+            quilometragem: refKm,
+          }}
+          placeholders={{
+            marca: 'Ex.: Chevrolet',
+            modelo: 'Ex.: Onix Plus LT 1.0 Turbo',
+            cor: 'Ex.: Prata',
+          }}
+        />
       </div>
 
       <div className="flex justify-end gap-2">
@@ -227,47 +194,17 @@ export function FormularioNovoVeiculo() {
       </div>
     </form>
   )
+}
 
-  function renderCampoTexto(campo: CampoTexto, label: string, placeholder?: string) {
-    return (
-      <Field label={label} required error={erros[campo]}>
-        {(p) => (
-          <Input
-            {...p}
-            ref={refs[campo] as React.RefObject<HTMLInputElement>}
-            value={values[campo]}
-            placeholder={placeholder}
-            onChange={(e) => setCampo(campo, e.target.value)}
-            onBlur={() => validarCampo(campo)}
-            disabled={enviando}
-            invalid={Boolean(erros[campo])}
-          />
-        )}
-      </Field>
-    )
-  }
-
-  function renderCampoNumericoInteiro(campo: CampoNumerico, label: string) {
-    return (
-      <Field label={label} required error={erros[campo]}>
-        {(p) => (
-          <Input
-            {...p}
-            ref={refs[campo] as React.RefObject<HTMLInputElement>}
-            type="number"
-            inputMode="numeric"
-            numeric
-            value={values[campo] === '' ? '' : String(values[campo])}
-            onChange={(e) => {
-              const v = e.target.value
-              setCampo(campo, v === '' ? '' : Number(v))
-            }}
-            onBlur={() => validarCampo(campo)}
-            disabled={enviando}
-            invalid={Boolean(erros[campo])}
-          />
-        )}
-      </Field>
-    )
+// Slice do objeto de erros para passar ao CamposBaseVeiculo sem vazar `placa`.
+function errosBase(e: Erros): CamposBaseVeiculoErros {
+  return {
+    marca: e.marca,
+    modelo: e.modelo,
+    ano: e.ano,
+    cor: e.cor,
+    tipo: e.tipo,
+    preco: e.preco,
+    quilometragem: e.quilometragem,
   }
 }
